@@ -34,9 +34,10 @@ window.onload = () => {
                     places.forEach(place => {
                         // Add AR markers
                         const placeMarker = document.createElement('a-entity');
-                        placeMarker.setAttribute('geometry', 'primitive: sphere; radius: 0.5');
+                        placeMarker.setAttribute('geometry', 'primitive: sphere; radius: 0.2');
                         placeMarker.setAttribute('material', 'color: blue');
                         placeMarker.setAttribute('gps-entity-place', `latitude: ${place.lat}; longitude: ${place.lon};`);
+                        placeMarker.setAttribute('text'=place.name);
 
 
                         scene.appendChild(placeMarker);

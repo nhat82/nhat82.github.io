@@ -37,7 +37,8 @@ window.onload = () => {
                         placeMarker.setAttribute('geometry', 'primitive: sphere; radius: 0.2');
                         placeMarker.setAttribute('material', 'color: blue');
                         placeMarker.setAttribute('gps-entity-place', `latitude: ${place.lat}; longitude: ${place.lon};`);
-                        placeMarker.setAttribute('text'=place.name);
+                        placeMarker.setAttribute('text', `value: ${place.name}; align: center; color: white;`);
+                        
 
 
                         scene.appendChild(placeMarker);

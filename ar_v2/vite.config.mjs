@@ -1,14 +1,12 @@
 import { defineConfig } from 'vite';
 import { resolve } from 'path';
 
-const entries = { main: 'index.html' };
-
 export default defineConfig({
-    base: '/ar_v2/',  // Set this to match the GitHub Pages deployment URL
+    base: '/nhat82.github.io/ar_v2/', // Ensure this matches your GitHub Pages URL
     build: {
-        outDir: '../docs/ar_v2', // Ensure files are output correctly
+        outDir: '../docs/ar_v2',
         rollupOptions: {
-            input: entries
+            input: { main: 'index.html' }
         }
     }
 });

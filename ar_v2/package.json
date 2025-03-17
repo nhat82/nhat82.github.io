@@ -1,13 +1,13 @@
 {
     "dependencies": {
-      "three": "^0.169.0",
-      "locar": "^0.0.6"
+        "locar": "^0.0.6",
+        "three": "^0.169.0"
     },
     "devDependencies": {
-      "vite": "^5.4.8"
+        "vite": "^5.4.14"
     },
     "scripts": {
-      "dev": "vite dev",
-      "build": "vite build"
+        "dev": "vite dev",
+        "build": "vite build"
     }
-  }
+}

@@ -10,8 +10,8 @@ window.onload = () => {
             userLocation.textContent = `Lat: ${userLat.toFixed(6)}, Lon: ${userLon.toFixed(6)}`;
             console.log("User Location:", userLat, userLon);
             
-            const userDot = document.getElementById('user-dot');
-            userDot.setAttribute('gps-entity-place', `latitude: ${userLat}; longitude: ${userLon};`);
+            const userBox = document.getElementById('user-box');
+            userBox.setAttribute('gps-entity-place', `latitude: ${userLat}; longitude: ${userLon};`);
 
             fetch('./ABG_Database_101124wSID_cleaned_112824_wHornbake.csv')
                 .then(response => response.text())

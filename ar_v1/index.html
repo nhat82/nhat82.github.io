@@ -75,8 +75,7 @@
     <a-scene
     vr-mode-ui="enabled: false"
     embedded
-    arjs='sourceType: webcam; sourceWidth:1280; sourceHeight:960; displayWidth:1280; displayHeight:960; debugUIEnabled: false;'
-    renderer='antialias: true; alpha: true'>
+    arjs='sourceType: webcam; sourceWidth:1280; sourceHeight:960; displayWidth:1280; displayHeight:960; debugUIEnabled: false;'>
     <!-- Dot for user's location (will update dynamically) 
     <a-entity id="user-dot" 
               geometry="primitive: sphere; radius: 0.2" 
@@ -86,7 +85,7 @@
     -->
 
     <!--<a-camera gps-camera rotation-reader></a-camera> -->
-    <a-camera gps-new-camera='gpsMinDistance: 40'></a-camera>
+    <a-camera gps-new-camera='gpsMinDistance: 400'></a-camera>
 </a-scene>
 
     <!-- Info Panel -->

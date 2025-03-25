@@ -26,8 +26,8 @@ window.onload = () => {
                             distance: getDistance(userLat, userLon, place.lat, place.lon)
                         }))
                         .filter(place => place.distance <= 10) // Only within 5 meters
-                        .sort((a, b) => a.distance - b.distance); // Sort nearest first
-                        // .slice(0, ); // Pick the closest 5
+                        .sort((a, b) => a.distance - b.distance) // Sort nearest first
+                        .slice(0, 5); // Pick the closest 5
 
                     console.log("Nearest Plants:", places);
 

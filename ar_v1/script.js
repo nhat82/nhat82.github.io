@@ -25,9 +25,9 @@ window.onload = () => {
                             ...place,
                             distance: getDistance(userLat, userLon, place.lat, place.lon)
                         }))
-                        .filter(place => place.distance <= 100) // Only within 5 meters
-                        .sort((a, b) => a.distance - b.distance) // Sort nearest first
-                        .slice(0, 10); // Pick the closest 10
+                        .filter(place => place.distance <= 10) // Only within 5 meters
+                        .sort((a, b) => a.distance - b.distance); // Sort nearest first
+                        // .slice(0, ); // Pick the closest 5
 
                     console.log("Nearest Plants:", places);
 
@@ -37,10 +37,7 @@ window.onload = () => {
                         placeMarker.setAttribute('geometry', 'primitive: sphere; radius: 0.2');
                         placeMarker.setAttribute('material', 'color: blue');
                         placeMarker.setAttribute('gps-entity-place', `latitude: ${place.lat}; longitude: ${place.lon};`);
-                        placeMarker.setAttribute('text', `value: ${place.name}; align: center; color: white;`);
-                        // placeMarker.addEventListener('loaded', () => {
-                        //     window.dispatchEvent(new CustomEvent('gps-entity-place-loaded'))
-                        // });
+
 
                         scene.appendChild(placeMarker);
                         // scene.appendChild(placeLabel);

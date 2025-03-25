@@ -38,8 +38,9 @@ window.onload = () => {
                         placeMarker.setAttribute('material', 'color: blue');
                         placeMarker.setAttribute('gps-entity-place', `latitude: ${place.lat}; longitude: ${place.lon};`);
                         placeMarker.setAttribute('text', `value: ${place.name}; align: center; color: white;`);
-                        
-
+                        placeMarker.addEventListener('loaded', () => {
+                            window.dispatchEvent(new CustomEvent('gps-entity-place-loaded'))
+                        });
 
                         scene.appendChild(placeMarker);
                         // scene.appendChild(placeLabel);

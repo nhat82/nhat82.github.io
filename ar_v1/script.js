@@ -2,8 +2,9 @@ window.onload = () => {
     const scene = document.querySelector('a-scene');
     const userLocation = document.getElementById('user-location');
     const plantList = document.getElementById('plant-list');
+    const el = document.querySelector("[gps-new-camera]");
 
-    // Watch the user's position continuously
+    
     const watchId = navigator.geolocation.watchPosition(
         (position) => {
             const userLat = position.coords.latitude;

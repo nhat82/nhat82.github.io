@@ -3,13 +3,14 @@ window.onload = () => {
     const userLocation = document.getElementById('user-location');
     const plantList = document.getElementById('plant-list');
 
-    navigator.geolocation.getCurrentPosition(
+    // Watch the user's position continuously
+    const watchId = navigator.geolocation.watchPosition(
         (position) => {
             const userLat = position.coords.latitude;
             const userLon = position.coords.longitude;
             userLocation.textContent = `Lat: ${userLat.toFixed(6)}, Lon: ${userLon.toFixed(6)}`;
             console.log("User Location:", userLat, userLon);
-            
+
             const userDot = document.getElementById('user-dot');
             userDot.setAttribute('gps-entity-place', `latitude: ${userLat}; longitude: ${userLon};`);
 
@@ -25,7 +26,7 @@ window.onload = () => {
                             ...place,
                             distance: getDistance(userLat, userLon, place.lat, place.lon)
                         }))
-                        .filter(place => place.distance <= 15) // Only within 5 meters
+                        .filter(place => place.distance <= 10) // Only within 10 meters
                         .sort((a, b) => a.distance - b.distance) // Sort nearest first
                         .slice(0, 10); // Pick the closest 10
 
@@ -49,11 +50,11 @@ window.onload = () => {
                         });
                         
                         scene.appendChild(placeMarker);
-                        // scene.appendChild(placeLabel);
 
                         // Add to list in UI
                         const listItem = document.createElement('li');
-                        listItem.innerText = ` ${place.cname1 || "N/A"} ${place.cname2 || "N/A"} ${place.cname3 || "N/A"} Genus: ${place.genus || "N/A"} Species: ${place.species || "N/A"} Cultivar: ${place.cultivar || "N/A"} (${place.distance.toFixed(2)}m) ${place.lat},${place.lon}`;
+                        
+                        listItem.innerText = `${place.cname1 || "N/A"} ${place.cname2 || "N/A"} ${place.cname3 || "N/A"} Genus: ${place.genus || "N/A"} Species: ${place.species || "N/A"} Cultivar: ${place.cultivar || "N/A"} (${place.distance.toFixed(2)}m) ${place.lat},${place.lon}`;
                         plantList.appendChild(listItem);
                     });
                 })
@@ -63,7 +64,11 @@ window.onload = () => {
             console.error("Geolocation error:", error.message);
             userLocation.textContent = "Location unavailable";
         },
-        { enableHighAccuracy: true, maximumAge: 0, timeout: 27000 }
+        {
+            enableHighAccuracy: true,
+            maximumAge: 0,
+            timeout: 27000
+        }
     );
 };
 
@@ -74,11 +79,12 @@ function parseCSV(csvText) {
         .map(row => {
             const columns = row.split(',');
 
+            // Handle missing columns by concatenating empty strings
             while (columns.length < 9) {
                 columns.push(""); // Add empty strings for missing cells
             }
 
-            // Use (columns[index] || "").trim() to handle empty values safely
+            // Create a place object even if some columns are missing
             return {
                 s_id: (columns[0] || "").trim(),
                 cname1: (columns[1] || "").trim(),
@@ -87,13 +93,12 @@ function parseCSV(csvText) {
                 genus: (columns[4] || "").trim(),
                 species: (columns[5] || "").trim(),
                 cultivar: (columns[6] || "").trim(),
-                lon: parseFloat(columns[7]) || 0, // Default to 0 if empty
-                lat: parseFloat(columns[8]) || 0  // Default to 0 if empty
+                lon: parseFloat(columns[7]) || 0, // Default to 0 if empty or invalid
+                lat: parseFloat(columns[8]) || 0  // Default to 0 if empty or invalid
             };
         })
         .filter(place => place.s_id && place.lat !== 0 && place.lon !== 0); // Exclude invalid entries
 }
-
 
 // Haversine formula to calculate distance in meters
 function getDistance(lat1, lon1, lat2, lon2) {

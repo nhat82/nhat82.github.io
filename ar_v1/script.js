@@ -53,7 +53,6 @@ window.onload = () => {
 
                         // Add to list in UI
                         const listItem = document.createElement('li');
-                        
                         listItem.innerText = `${place.cname1 || "N/A"} ${place.cname2 || "N/A"} ${place.cname3 || "N/A"} Genus: ${place.genus || "N/A"} Species: ${place.species || "N/A"} Cultivar: ${place.cultivar || "N/A"} (${place.distance.toFixed(2)}m) ${place.lat},${place.lon}`;
                         plantList.appendChild(listItem);
                     });

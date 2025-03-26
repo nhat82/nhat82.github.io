@@ -1,82 +1,16 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Plants AR Demo v2</title>
-    <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
-    <script type='text/javascript' src='https://raw.githack.com/AR-js-org/AR.js/3.4.5/three.js/build/ar-threex-location-only.js'></script>
-    <script type='text/javascript' src='https://raw.githack.com/AR-js-org/AR.js/3.4.5/aframe/build/aframe-ar.js'></script>
-    <!-- <script src="./script.js"></script> -->
-    <script src="./draft.js"></script>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: Arial, sans-serif;
-            height: 100vh;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-        }
-
-        /* A-Frame Scene (70% height) */
-        #scene-container {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 70%;
-            background: black;
-        }
-
-        /* Info Panel (30% height) */
-        #info-container {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 30%;
-            background: white;
-            padding: 10px;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-start;
-            overflow-y: auto;
-        }
-
-        #user-location {
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-        #plant-list {
-            list-style-type: decimal; /* Ensures numbers are shown */
-        }
-        
-    </style>
+<title>AR.js A-Frame Location-based</title>
+<script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
+<script type='text/javascript' src='https://raw.githack.com/AR-js-org/AR.js/3.4.5/three.js/build/ar-threex-location-only.js'></script>
+<script type='text/javascript' src='https://raw.githack.com/AR-js-org/AR.js/3.4.5/aframe/build/aframe-ar.js'></script>
+<script src="./draft.js"></script>
 </head>
 <body>
-    <!-- A-Frame Scene (AR) -->
-    <!-- <div id="scene-container">
-        <a-scene embedded vr-mode-ui="enabled: false" arjs="sourceType: webcam; debugUIEnabled: false;">
-            <a-camera gps-camera="minDistance: 40;" rotation-reader></a-camera>
-        </a-scene>
-    </div> -->
-    <a-scene vr-mode-ui='enabled: false' arjs='sourceType: webcam; videoTexture: true; debugUIEnabled: false; sourceWidth:1280; sourceHeight:960; displayWidth:1280; displayHeight:960;' renderer='antialias: true; alpha: true'>    
-        <a-camera gps-new-camera='gpsMinDistance: 5'></a-camera>
-        <!-- Dot for user's location (will update dynamically) -->
-        <a-box id="user-dot" color="red" gps-new-entity-place="latitude: 0; longitude: 0" depth="10" height="10" width="10"></a-box>
-    </a-entity>
+<a-scene vr-mode-ui='enabled: false' arjs='sourceType: webcam; sourceWidth:1280; sourceHeight:960; displayWidth:1280; displayHeight:960; videoTexture: true; debugUIEnabled: false' renderer='antialias: true; alpha: true'>
+    <a-camera gps-new-camera='gpsMinDistance: 5'></a-camera>
+    <a-box color="red" gps-new-entity-place="latitude: 0; longitude: 0" depth="10" height="10" width="10"></a-box>
 </a-scene>
-
-    <!-- Info Panel -->
-    <div id="info-container">
-        <p id="user-location">Fetching data...</p>
-        <ol id="plant-list"> Closest plants </ol>
-    </div>
 </body>
 </html>

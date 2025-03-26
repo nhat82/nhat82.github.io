@@ -2,9 +2,8 @@ window.onload = () => {
     const scene = document.querySelector('a-scene');
     const userLocation = document.getElementById('user-location');
     const plantList = document.getElementById('plant-list');
-    const el = document.querySelector("[gps-new-camera]");
 
-    
+    // Watch the user's position continuously
     const watchId = navigator.geolocation.watchPosition(
         (position) => {
             const userLat = position.coords.latitude;
@@ -54,6 +53,7 @@ window.onload = () => {
 
                         // Add to list in UI
                         const listItem = document.createElement('li');
+                        
                         listItem.innerText = `${place.cname1 || "N/A"} ${place.cname2 || "N/A"} ${place.cname3 || "N/A"} Genus: ${place.genus || "N/A"} Species: ${place.species || "N/A"} Cultivar: ${place.cultivar || "N/A"} (${place.distance.toFixed(2)}m) ${place.lat},${place.lon}`;
                         plantList.appendChild(listItem);
                     });

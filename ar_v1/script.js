@@ -13,6 +13,9 @@ window.onload = () => {
 
             const userDot = document.getElementById('user-dot');
             userDot.setAttribute('gps-entity-place', `latitude: ${userLat}; longitude: ${userLon};`);
+            userDot.addEventListener('click', function (evt) {
+                console.log('Current user lala');
+              });
 
             fetch('ABG_Database_101124wSID_cleaned_112824_wHornbake.csv')
                 .then(response => response.text())

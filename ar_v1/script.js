@@ -13,7 +13,7 @@ window.onload = () => {
             const userDot = document.getElementById('user-dot');
             userDot.setAttribute('gps-entity-place', `latitude: ${userLat}; longitude: ${userLon};`);
 
-            fetch('./ABG_Database_101124wSID_cleaned_112824_wHornbake.csv')
+            fetch('ABG_Database_101124wSID_cleaned_112824_wHornbake.csv')
                 .then(response => response.text())
                 .then(csvText => {
                     console.log("CSV Loaded Successfully!");
@@ -25,16 +25,16 @@ window.onload = () => {
                             ...place,
                             distance: getDistance(userLat, userLon, place.lat, place.lon)
                         }))
-                        .filter(place => place.distance <= 10) // Only within 5 meters
-                        .sort((a, b) => a.distance - b.distance); // Sort nearest first
-                        // .slice(0, ); // Pick the closest 5
+                        .filter(place => place.distance <= 15) // Only within 5 meters
+                        .sort((a, b) => a.distance - b.distance) // Sort nearest first
+                        .slice(0, 10); // Pick the closest 10
 
                     console.log("Nearest Plants:", places);
 
                     places.forEach(place => {
                         // Add AR markers
                         const placeMarker = document.createElement('a-entity');
-                        placeMarker.setAttribute('geometry', 'primitive: sphere; radius: 0.2');
+                        placeMarker.setAttribute('geometry', 'primitive: sphere; radius: 0.1');
                         placeMarker.setAttribute('material', 'color: blue');
                         placeMarker.setAttribute('gps-entity-place', `latitude: ${place.lat}; longitude: ${place.lon};`);
                         placeMarker.addEventListener('click', () => {
@@ -53,7 +53,7 @@ window.onload = () => {
 
                         // Add to list in UI
                         const listItem = document.createElement('li');
-                        listItem.innerText = `${place.name} (${place.distance.toFixed(2)}m) ${place.lat},${place.lon}`;
+                        listItem.innerText = ` ${place.cname1 || "N/A"} ${place.cname2 || "N/A"} ${place.cname3 || "N/A"} Genus: ${place.genus || "N/A"} Species: ${place.species || "N/A"} Cultivar: ${place.cultivar || "N/A"} (${place.distance.toFixed(2)}m) ${place.lat},${place.lon}`;
                         plantList.appendChild(listItem);
                     });
                 })
@@ -74,7 +74,9 @@ function parseCSV(csvText) {
         .map(row => {
             const columns = row.split(',');
 
-            if (columns.length < 9) return null;
+            while (columns.length < 9) {
+                columns.push(""); // Add empty strings for missing cells
+            }
 
             // Use (columns[index] || "").trim() to handle empty values safely
             return {

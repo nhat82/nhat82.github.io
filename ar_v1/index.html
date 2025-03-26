@@ -54,14 +54,10 @@
             font-weight: bold;
             margin-bottom: 5px;
         }
-
         #plant-list {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-            overflow-y: auto;
-            flex-grow: 1;
+            list-style-type: decimal; /* Ensures numbers are shown */
         }
+        
     </style>
 </head>
 <body>
@@ -78,7 +74,7 @@
     
     <!-- Dot for user's location (will update dynamically) -->
     <a-entity id="user-dot" 
-              geometry="primitive: sphere; radius: 0.5" 
+              geometry="primitive: sphere; radius: 0.1" 
               material="color: red" 
               gps-entity-place="longitude: 0; latitude: 0;">
     </a-entity>
@@ -89,7 +85,7 @@
     <!-- Info Panel -->
     <div id="info-container">
         <p id="user-location">Fetching data...</p>
-        <ul id="plant-list"> Closest plants</ul>
+        <ol id="plant-list"> Closest plants </ol>
     </div>
 </body>
 </html>

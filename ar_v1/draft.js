@@ -53,16 +53,16 @@ window.onload = () => {
                         latitude: plant.lat,
                         longitude: plant.lon
                     });
-                    plantMarker.addEventListener('click', () => {
-                        alert(`Plant Details:
-                            s_id: ${plant.s_id}
-                            cname1: ${plant.cname1 || "N/A"}
-                            cname2: ${plant.cname2 || "N/A"}
-                            cname3: ${plant.cname3 || "N/A"}
-                            Genus: ${plant.genus || "N/A"}
-                            Species: ${plant.species || "N/A"}
-                            Cultivar: ${plant.cultivar || "N/A"}`);
-                    });
+                    // plantMarker.addEventListener('click', () => {
+                    //     alert(`Plant Details:
+                    //         s_id: ${plant.s_id}
+                    //         cname1: ${plant.cname1 || "N/A"}
+                    //         cname2: ${plant.cname2 || "N/A"}
+                    //         cname3: ${plant.cname3 || "N/A"}
+                    //         Genus: ${plant.genus || "N/A"}
+                    //         Species: ${plant.species || "N/A"}
+                    //         Cultivar: ${plant.cultivar || "N/A"}`);
+                    // });
                     scene.appendChild(plantMarker);
                     
                     // Add to list in UI

@@ -44,7 +44,7 @@ window.onload = () => {
                         ...plant,
                         distance: getDistance(userLat, userLon, plant.lat, plant.lon)
                     }))
-                    .filter(plant => plant.distance <= 10)
+                    .filter(plant => plant.distance <= 50)
                     .sort((a, b) => a.distance - b.distance)
                     .slice(0, 10);
 

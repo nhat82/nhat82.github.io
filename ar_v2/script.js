@@ -57,6 +57,7 @@ window.onload = () => {
                     plantMarker.setAttribute("scale", "1 1 1");
                     plantMarker.setAttribute("material", "color: blue");
                     plantMarker.setAttribute("gps-new-entity-place", `latitude: ${plant.lat}; longitude: ${plant.lon}`);
+                    plantMarker.setAttribute("position", "0 1 0");
                     scene.appendChild(plantMarker);
                     
                     const listItem = document.createElement('li');

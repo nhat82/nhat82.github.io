@@ -17,7 +17,7 @@ window.onload = () => {
                 console.log('Current user lala');
               });
 
-            fetch('ABG_Database_101124wSID_cleaned_112824_wHornbake.csv')
+            fetch('../ABG.csv')
                 .then(response => response.text())
                 .then(csvText => {
                     console.log("CSV Loaded Successfully!");

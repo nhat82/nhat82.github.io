@@ -31,7 +31,7 @@ window.onload = () => {
             userMarkerAdded = true;
         }
 
-        fetch("ABG_Database_101124wSID_cleaned_112824_wHornbake.csv")
+        fetch("../ABG_Database_101124wSID_cleaned_112824_wHornbake.csv")
             .then(response => {
                 if (!response.ok) throw new Error("Failed to load CSV file.");
                 return response.text();

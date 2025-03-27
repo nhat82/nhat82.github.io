@@ -26,7 +26,7 @@ window.onload = () => {
             userMarker.setAttribute("scale", "1 1 1");
             userMarker.setAttribute("material", "color: red");
             userMarker.setAttribute("gps-new-entity-place", `latitude: ${userLat}; longitude: ${userLon}`);
-            userBox.setAttribute("clickable", "");
+            // userBox.setAttribute("clickable", "");
             scene.appendChild(userMarker);
             userMarkerAdded = true;
         }

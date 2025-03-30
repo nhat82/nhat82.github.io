@@ -1,44 +1,50 @@
-document.addEventListener('DOMContentLoaded', () => {
-    let scene = document.querySelector('a-scene');
-    let objectCount = 0; // Track the order of placed objects
+window.onload = () => {
+    const scene = document.querySelector('a-scene');
+    const userLocation = document.getElementById('user-location');
+    const plantList = document.getElementById('plant-list');
 
-    scene.addEventListener('click', (event) => {
-        objectCount++; // Increment order count
+    // Watch the user's position continuously
+    const watchId = navigator.geolocation.watchPosition(
+        (position) => {
+            const userLat = position.coords.latitude;
+            const userLon = position.coords.longitude;
+            userLocation.textContent = `Lat: ${userLat.toFixed(6)}, Lon: ${userLon.toFixed(6)}`;
+            console.log("User Location:", userLat, userLon);
 
-        // Create the AR object at the tapped location
-        const placeMarker = document.createElement('a-entity');
-        placeMarker.setAttribute('geometry', 'primitive: sphere; radius: 0.1');
-        placeMarker.setAttribute('material', 'color: blue');
-        placeMarker.setAttribute('gps-entity-place', `latitude: 0; longitude: 0;`); // Placeholder
-        placeMarker.setAttribute('order', objectCount); // Store order
-
-        // Wait for marker to load before setting GPS coordinates
-        placeMarker.addEventListener('loaded', () => {
-            navigator.geolocation.getCurrentPosition((position) => {
-                const { latitude, longitude } = position.coords;
-                placeMarker.setAttribute('gps-entity-place', `latitude: ${latitude}; longitude: ${longitude};`);
-            });
-        });
-
-        // Add click event to show placement order
-        placeMarker.addEventListener('click', (ev) => {
-            ev.stopPropagation();
-            ev.preventDefault();
-
-            const order = ev.target.getAttribute('order');
-
-            // Display order in info panel
-            const infoPanel = document.getElementById('info-container');
-            const infoText = document.createElement('p');
-            infoText.innerText = `You placed object #${order}`;
-            infoPanel.appendChild(infoText);
-
-            // Auto-remove message after 2 seconds
-            setTimeout(() => {
-                infoPanel.removeChild(infoText);
-            }, 2000);
-        });
-
-        scene.appendChild(placeMarker);
-    });
-});
+            const userDot = document.getElementById('user-dot');
+            userDot.setAttribute('gps-entity-place', `latitude: ${userLat}; longitude: ${userLon};`);
+            userDot.addEventListener('click', (ev) => {
+                ev.stopPropagation();
+                ev.preventDefault();
+        
+                const el = ev.detail?.intersection?.object?.el;
+                if (el && el === ev.target) {
+                    // Create and display a label with plant details
+                    const container = document.createElement('div');
+                    container.setAttribute('id', 'plant-label');
+                    container.style.position = 'absolute';
+                    container.style.top = '50%';
+                    container.style.left = '50%';
+                    container.style.transform = 'translate(-50%, -50%)';
+                    container.style.background = 'rgba(0, 0, 0, 0.7)';
+                    container.style.color = 'white';
+                    container.style.padding = '10px';
+                    container.style.borderRadius = '5px';
+                    container.style.fontSize = '14px';
+                    container.style.textAlign = 'center';
+                    container.style.zIndex = '1000';
+        
+                    container.innerText = `User Clicked`;
+                }});
+        },
+        (error) => {
+            console.error("Geolocation error:", error.message);
+            userLocation.textContent = "Location unavailable";
+        },
+        {
+            enableHighAccuracy: true,
+            maximumAge: 0,
+            timeout: 27000
+        }
+    );
+};

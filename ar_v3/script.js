@@ -29,7 +29,7 @@ window.onload = () => {
                             ...place,
                             distance: getDistance(userLat, userLon, place.lat, place.lon)
                         }))
-                        .filter(place => place.distance <= 10) // Only within 10 meters
+                        .filter(place => place.distance <= 5) // Only within 10 meters
                         .sort((a, b) => a.distance - b.distance) // Sort nearest first
                         .slice(0, 10); // Pick the closest 10
 
@@ -41,17 +41,36 @@ window.onload = () => {
                         placeMarker.setAttribute('geometry', 'primitive: sphere; radius: 0.1');
                         placeMarker.setAttribute('material', 'color: blue');
                         placeMarker.setAttribute('gps-entity-place', `latitude: ${place.lat}; longitude: ${place.lon};`);
-                        placeMarker.addEventListener('click', () => {
-                            alert(`Plant Details:
-                                s_id: ${place.s_id}
-                                cname1: ${place.cname1 || "N/A"}
-                                cname2: ${place.cname2 || "N/A"}
-                                cname3: ${place.cname3 || "N/A"}
-                                Genus: ${place.genus || "N/A"}
-                                Species: ${place.species || "N/A"}
-                                Cultivar: ${place.cultivar || "N/A"}`);
-                        });
-                        
+                        placeMarker.addEventListener('click', (ev) => {
+                            ev.stopPropagation();
+                            ev.preventDefault();
+                    
+                            const el = ev.detail?.intersection?.object?.el;
+                            if (el && el === ev.target) {
+                                // Create and display a label with plant details
+                                const container = document.createElement('div');
+                                container.setAttribute('id', 'plant-label');
+                                container.style.position = 'absolute';
+                                container.style.top = '50%';
+                                container.style.left = '50%';
+                                container.style.transform = 'translate(-50%, -50%)';
+                                container.style.background = 'rgba(0, 0, 0, 0.7)';
+                                container.style.color = 'white';
+                                container.style.padding = '10px';
+                                container.style.borderRadius = '5px';
+                                container.style.fontSize = '14px';
+                                container.style.textAlign = 'center';
+                                container.style.zIndex = '1000';
+                    
+                                container.innerText = `Plant Details:\n
+                                    s_id: ${place.s_id}\n
+                                    cname1: ${place.cname1 || "N/A"}\n
+                                    cname2: ${place.cname2 || "N/A"}\n
+                                    cname3: ${place.cname3 || "N/A"}\n
+                                    Genus: ${place.genus || "N/A"}\n
+                                    Species: ${place.species || "N/A"}\n
+                                    Cultivar: ${place.cultivar || "N/A"}`;
+                            }});
                         scene.appendChild(placeMarker);
 
                         // Add to list in UI
@@ -118,3 +137,5 @@ function getDistance(lat1, lon1, lat2, lon2) {
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     return R * c; // Distance in meters
 }
+
+

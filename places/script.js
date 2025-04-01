@@ -6,9 +6,18 @@ function loadPlaces() {
 
 window.onload = () => {
     const scene = document.querySelector('a-scene');
+    const userLocation = document.getElementById('user-location');
 
-    navigator.geolocation.getCurrentPosition(
-        function (position) {
+    const watchId = navigator.geolocation.watchPosition(
+        (position) => {
+            const userLat = position.coords.latitude;
+            const userLon = position.coords.longitude;
+            userLocation.textContent = `Lat: ${userLat.toFixed(6)}, Lon: ${userLon.toFixed(6)}`;
+            console.log("User Location:", userLat, userLon);
+
+            const userDot = document.getElementById('user-dot');
+            userDot.setAttribute('gps-entity-place', `latitude: ${userLat}; longitude: ${userLon};`);
+
             const places = loadPlaces();
             places.forEach((place) => {
                 const placeText = document.createElement('a-link');

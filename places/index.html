@@ -13,11 +13,76 @@
     <script src="./script.js"></script>
 </head>
 
-<body style='margin: 0; overflow: hidden;'>
-    <a-scene 
-        vr-mode-ui='enabled: false' 
-        embedded
-        arjs='sourceType: webcam; sourceWidth:1280; sourceHeight:960; displayWidth: 1280; displayHeight: 960; debugUIEnabled: false;'>
-    <a-camera gps-camera="minDistance: 40;" rotation-reader></a-camera>
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: Arial, sans-serif;
+        height: 100vh;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* A-Frame Scene (70% height) */
+    #scene-container {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 70%;
+        background: black;
+    }
+
+    /* Info Panel (30% height) */
+    #info-container {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 30%;
+        background: white;
+        padding: 10px;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        overflow-y: auto;
+    }
+
+    #user-location {
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+    #plant-list {
+        list-style-type: decimal; /* Ensures numbers are shown */
+    }
+    
+</style>
+</head>
+<body>
+
+<a-scene
+vr-mode-ui="enabled: false"
+embedded
+arjs='sourceType: webcam; sourceWidth:1280; sourceHeight:960; displayWidth:1280; displayHeight:960; debugUIEnabled: false;'>
+<a-entity id="user-dot" 
+          geometry="primitive: sphere; radius: 0.2" 
+          material="color: red" 
+          gps-entity-place="longitude: 0; latitude: 0;">
+</a-entity>
+
+<a-camera gps-camera rotation-reader></a-camera>
 </a-scene>
+
+<!-- Info Panel -->
+<div id="info-container">
+    <p>Places 🌺</p>
+    <p id="user-location">Fetching data...</p>
+</div>
 </body>
+</html>
+

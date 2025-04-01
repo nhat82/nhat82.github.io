@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/ar.js@1.7.2/aframe/build/aframe-ar.min.js"></script>
+</head>
+<body style="margin: 0; overflow: hidden;">
+    <a-scene embedded arjs>
+        <a-camera position="0 0 0">
+            <a-cursor></a-cursor>
+        </a-camera>
+        <a-box position="0 0.5 -2" color="red" id="box"></a-box>
+        <a-text id="popup-text" value="" position="0 2 -1.5" color="white" align="center" scale="5 5 5"></a-text>
+    </a-scene>
+
+    <script>
+        AFRAME.registerComponent("click-color-change", {
+            init: function () {
+                let box = this.el;
+                let text = document.getElementById("popup-text");
+                box.addEventListener("click", function () {
+                    let currentColor = box.getAttribute("color");
+                    box.setAttribute("color", currentColor === "red" ? "blue" : "red");
+                    text.setAttribute("value", "Box Clicked!");
+                    setTimeout(() => {
+                        text.setAttribute("value", "");
+                    }, 3000);
+                });
+            }
+        });
+
+        document.getElementById("box").setAttribute("click-color-change", "");
+    </script>
+</body>
+</html>

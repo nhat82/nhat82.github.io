@@ -6,14 +6,13 @@ window.onload = () => {
             entity.addEventListener("click", function () {
                 if (entity.id === "userDot") {
                     info.innerText = "Current User Dot";
-                } else if (entity.id == "plantDot") {
-                    info.innerText = entity.text;
+                } else if (entity.id === "plantDot") {
+                    info.innerText = entity.getAttribute("data-plant-info");
                 }
             });
         }
     });
 
-    
     const scene = document.querySelector("a-scene");
     const userLocation = document.getElementById('user-location');
     const plantList = document.getElementById('plant-list');
@@ -29,6 +28,13 @@ window.onload = () => {
         console.log(`User Location: ${userLat}, ${userLon}`);
         userLocation.textContent = `Lat: ${userLat}, Lon: ${userLon}`;
 
+        // Remove previous user marker (if any) to prevent duplication
+        const existingUserMarker = document.getElementById("userDot");
+        if (existingUserMarker) {
+            existingUserMarker.remove();
+        }
+
+        // Create user marker
         const userMarker = document.createElement("a-box");
         userMarker.setAttribute("scale", "0.2 0.2 0.2");
         userMarker.setAttribute("material", "color: red");
@@ -58,28 +64,26 @@ window.onload = () => {
                 console.log("Nearest Plants:", plants);
 
                 plantList.innerHTML = `Total Plants Found: ${plants.length}`;
+
                 plants.forEach(plant => {
                     const plantMarker = document.createElement("a-box");
                     plantMarker.setAttribute("scale", "0.1 0.1 0.1");
                     plantMarker.setAttribute("material", "color: blue");
                     plantMarker.setAttribute("gps-new-entity-place", `latitude: ${plant.lat}; longitude: ${plant.lon}`);
-                    plantMarker.setAttribute("position", "0 1 0");
                     plantMarker.setAttribute("id", "plantDot");
-                    plantMarker.setAttribute("text", `${plant.cname1 || "N/A"} ${plant.cname2 || ""} ${plant.cname3 || ""} - Genus: ${plant.genus || "N/A"}, Species: ${plant.species || "N/A"}, Cultivar: ${plant.cultivar || "N/A"} (${plant.distance.toFixed(2)}m)`);
-                    // plantMarker.classList.add("plantMarker");
-                    // plantMarker.dataset.s_id = plant.s_id;
-                    // plantMarker.dataset.cname1 = plant.cname1;
-                    // plantMarker.dataset.cname2 = plant.cname2;
-                    // plantMarker.dataset.cname3 = plant.cname3;
-                    // plantMarker.dataset.genus = plant.genus;
-                    // plantMarker.dataset.species = plant.species;
-                    // plantMarker.dataset.cultivar = plant.cultivar;
                     plantMarker.setAttribute("click-info-display", "");
-                    scene.appendChild(plantMarker);
+                    plantMarker.setAttribute("data-plant-info", `${plant.cname1 || "N/A"} - Genus: ${plant.genus || "N/A"}, Species: ${plant.species || "N/A"} (${plant.distance.toFixed(2)}m)`);
+
+                    // Add a text label above the plant marker
+                    const textEntity = document.createElement("a-text");
+                    textEntity.setAttribute("value", `${plant.cname1 || "N/A"}`);
+                    textEntity.setAttribute("position", "0 0.5 0"); // Position above the box
+                    textEntity.setAttribute("align", "center");
+                    textEntity.setAttribute("color", "black");
+                    textEntity.setAttribute("scale", "1 1 1");
                     
-                    // const listItem = document.createElement('li');
-                    // listItem.innerText = `${plant.cname1 || "N/A"} ${plant.cname2 || ""} ${plant.cname3 || ""} - Genus: ${plant.genus || "N/A"}, Species: ${plant.species || "N/A"}, Cultivar: ${plant.cultivar || "N/A"} (${plant.distance.toFixed(2)}m)`;
-                    // plantList.appendChild(listItem);
+                    plantMarker.appendChild(textEntity);
+                    scene.appendChild(plantMarker);
                 });
             })
             .catch(err => console.error("Error loading CSV:", err));
@@ -87,8 +91,6 @@ window.onload = () => {
         console.error("Error obtaining geolocation:", error);
     }, { enableHighAccuracy: true, maximumAge: 0, timeout: 2000 });
 };
-
-
 
 // Function to parse CSV text into an array of plant objects
 function parseCSV(csvText) {

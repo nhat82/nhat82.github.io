@@ -4,9 +4,10 @@ window.onload = () => {
             let entity = this.el;
             let info = document.getElementById("info");
             entity.addEventListener("click", function () {
-                info.innerText = entity.getAttribute("data-plant-info") || "Unknown Plant";
+                // info.innerText = entity.getAttribute("data-plant-info") || "User";
+                info.innerText = entity.getAttribute("id") || "User";
             });
-        }
+        } 
     });
 
     const scene = document.querySelector("a-scene");
@@ -62,21 +63,21 @@ window.onload = () => {
                     console.log(`Plant: ${plant.cname1}, Lat: ${plant.lat}, Lon: ${plant.lon}`);
 
                     const plantMarker = document.createElement("a-box");
-                    plantMarker.setAttribute("scale", "0.1 0.1 0.1");
+                    plantMarker.setAttribute("scale", "0.2 0.2 0.2");
                     plantMarker.setAttribute("material", "color: blue");
                     plantMarker.setAttribute("gps-new-entity-place", `latitude: ${plant.lat}; longitude: ${plant.lon}`);
                     plantMarker.setAttribute("id", `plantDot-${plant.s_id}`); // Unique ID
+                    // plantMarker.setAttribute("data-plant-info", `${plant.cname1 || "N/A"} - Genus: ${plant.genus || "N/A"}, Species: ${plant.species || "N/A"} (${plant.distance.toFixed(2)}m)`);
                     plantMarker.setAttribute("click-info-display", "");
-                    plantMarker.setAttribute("data-plant-info", `${plant.cname1 || "N/A"} - Genus: ${plant.genus || "N/A"}, Species: ${plant.species || "N/A"} (${plant.distance.toFixed(2)}m)`);
 
-                    const textEntity = document.createElement("a-text");
-                    textEntity.setAttribute("value", plant.cname1 || "N/A");
-                    textEntity.setAttribute("position", "0 0.5 0");
-                    textEntity.setAttribute("align", "center");
-                    textEntity.setAttribute("color", "black");
-                    textEntity.setAttribute("scale", "1 1 1");
+                    // const textEntity = document.createElement("a-text");
+                    // textEntity.setAttribute("value", plant.cname1 || "N/A");
+                    // textEntity.setAttribute("position", "0 0.5 0");
+                    // textEntity.setAttribute("align", "center");
+                    // textEntity.setAttribute("color", "black");
+                    // textEntity.setAttribute("scale", "1 1 1");
 
-                    plantMarker.appendChild(textEntity);
+                    // plantMarker.appendChild(textEntity);
                     scene.appendChild(plantMarker);
                 });
             })

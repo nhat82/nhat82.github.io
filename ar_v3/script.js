@@ -6,9 +6,8 @@ window.onload = () => {
             entity.addEventListener("click", function () {
                 if (entity.id === "userDot") {
                     info.innerText = "Current User Dot";
-                } else if (entity.classList.contains("plantMarker")) {
-                    let plantData = entity.dataset;
-                    info.innerText = `Plant Info:\nS_ID: ${plantData.s_id}\nCommon Names: ${plantData.cname1}, ${plantData.cname2}, ${plantData.cname3}\nGenus: ${plantData.genus}\nSpecies: ${plantData.species}\nCultivar: ${plantData.cultivar}`;
+                } else if (entity.id == "plantDot") {
+                    info.innerText = entity.text;
                 }
             });
         }
@@ -17,8 +16,6 @@ window.onload = () => {
     
     const scene = document.querySelector("a-scene");
     const userLocation = document.getElementById('user-location');
-    // const camera = document.querySelector("[gps-new-camera]");
-    // const plantList = document.getElementById('plant-list');
 
     if (!navigator.geolocation) {
         userLocation.textContent = "Geolocation is not supported by your browser.";
@@ -66,15 +63,16 @@ window.onload = () => {
                     plantMarker.setAttribute("material", "color: blue");
                     plantMarker.setAttribute("gps-new-entity-place", `latitude: ${plant.lat}; longitude: ${plant.lon}`);
                     plantMarker.setAttribute("position", "0 1 0");
-                    userMarker.setAttribute("id", "plantDot");
-                    plantMarker.classList.add("plantMarker");
-                    plantMarker.dataset.s_id = plant.s_id;
-                    plantMarker.dataset.cname1 = plant.cname1;
-                    plantMarker.dataset.cname2 = plant.cname2;
-                    plantMarker.dataset.cname3 = plant.cname3;
-                    plantMarker.dataset.genus = plant.genus;
-                    plantMarker.dataset.species = plant.species;
-                    plantMarker.dataset.cultivar = plant.cultivar;
+                    plantMarker.setAttribute("id", "plantDot");
+                    plantMarker.setAttribute("text", `${plant.cname1 || "N/A"} ${plant.cname2 || ""} ${plant.cname3 || ""} - Genus: ${plant.genus || "N/A"}, Species: ${plant.species || "N/A"}, Cultivar: ${plant.cultivar || "N/A"} (${plant.distance.toFixed(2)}m)`);
+                    // plantMarker.classList.add("plantMarker");
+                    // plantMarker.dataset.s_id = plant.s_id;
+                    // plantMarker.dataset.cname1 = plant.cname1;
+                    // plantMarker.dataset.cname2 = plant.cname2;
+                    // plantMarker.dataset.cname3 = plant.cname3;
+                    // plantMarker.dataset.genus = plant.genus;
+                    // plantMarker.dataset.species = plant.species;
+                    // plantMarker.dataset.cultivar = plant.cultivar;
                     plantMarker.setAttribute("click-info-display", "");
                     scene.appendChild(plantMarker);
                     

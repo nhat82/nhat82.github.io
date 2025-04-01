@@ -25,14 +25,9 @@ window.onload = () => {
         return;
     }
 
-    camera.addEventListener("gps-camera-update-position", (e) => {
-        if (!e.detail.position) {
-            console.warn("No position data received.");
-            return;
-        }
-        
-        const userLat = e.detail.position.latitude;
-        const userLon = e.detail.position.longitude;
+    navigator.geolocation.watchPosition((position) => {
+        const userLat = position.coords.latitude;
+        const userLon = position.coords.longitude;
         console.log(`User Location: ${userLat}, ${userLon}`);
         userLocation.textContent = `Lat: ${userLat}, Lon: ${userLon}`;
 
@@ -91,5 +86,7 @@ window.onload = () => {
                 });
             })
             .catch(err => console.error("Error loading CSV:", err));
-    });
+    }, (error) => {
+        console.error("Error obtaining geolocation:", error);
+    }, { enableHighAccuracy: true, maximumAge: 0, timeout: 5000 });
 };

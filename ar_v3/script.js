@@ -14,10 +14,10 @@ window.onload = () => {
         }
     });
 
-    let userMarkerAdded = false;
+    
     const scene = document.querySelector("a-scene");
     const userLocation = document.getElementById('user-location');
-    const camera = document.querySelector("[gps-new-camera]");
+    // const camera = document.querySelector("[gps-new-camera]");
     const plantList = document.getElementById('plant-list');
 
     if (!navigator.geolocation) {
@@ -31,16 +31,13 @@ window.onload = () => {
         console.log(`User Location: ${userLat}, ${userLon}`);
         userLocation.textContent = `Lat: ${userLat}, Lon: ${userLon}`;
 
-        if (!userMarkerAdded) {
-            const userMarker = document.createElement("a-box");
-            userMarker.setAttribute("scale", "1 1 1");
-            userMarker.setAttribute("material", "color: red");
-            userMarker.setAttribute("gps-new-entity-place", `latitude: ${userLat}; longitude: ${userLon}`);
-            userMarker.setAttribute("id", "userDot");
-            userMarker.setAttribute("click-info-display", "");
-            scene.appendChild(userMarker);
-            userMarkerAdded = true;
-        }
+        const userMarker = document.createElement("a-box");
+        userMarker.setAttribute("scale", "1 1 1");
+        userMarker.setAttribute("material", "color: red");
+        userMarker.setAttribute("gps-new-entity-place", `latitude: ${userLat}; longitude: ${userLon}`);
+        userMarker.setAttribute("id", "userDot");
+        userMarker.setAttribute("click-info-display", "");
+        scene.appendChild(userMarker);
 
         fetch("../ABG.csv")
             .then(response => {
@@ -69,6 +66,7 @@ window.onload = () => {
                     plantMarker.setAttribute("material", "color: blue");
                     plantMarker.setAttribute("gps-new-entity-place", `latitude: ${plant.lat}; longitude: ${plant.lon}`);
                     plantMarker.setAttribute("position", "0 1 0");
+                    userMarker.setAttribute("id", "plantDot");
                     plantMarker.classList.add("plantMarker");
                     plantMarker.dataset.s_id = plant.s_id;
                     plantMarker.dataset.cname1 = plant.cname1;
@@ -90,3 +88,49 @@ window.onload = () => {
         console.error("Error obtaining geolocation:", error);
     }, { enableHighAccuracy: true, maximumAge: 0, timeout: 5000 });
 };
+
+
+
+// Function to parse CSV text into an array of plant objects
+function parseCSV(csvText) {
+    const rows = csvText.split("\n").slice(1); // Skip header row
+
+    return rows
+        .map(row => {
+            const columns = row.split(",");
+
+            // Handle missing columns by concatenating empty strings
+            while (columns.length < 9) {
+                columns.push(""); // Add empty strings for missing cells
+            }
+
+            return {
+                s_id: columns[0]?.trim(),
+                cname1: columns[1]?.trim() || "Unknown",
+                cname2: columns[2]?.trim() || "",
+                cname3: columns[3]?.trim() || "",
+                genus: columns[4]?.trim() || "Unknown",
+                species: columns[5]?.trim() || "",
+                cultivar: columns[6]?.trim() || "",
+                lon: parseFloat(columns[7]) || 0, // Default to 0 if missing
+                lat: parseFloat(columns[8]) || 0  // Default to 0 if missing
+            };
+        })
+        .filter(plant => plant.s_id && plant.lat !== 0 && plant.lon !== 0); // Remove invalid entries
+}
+
+// Function to calculate distance between two GPS points (Haversine formula)
+function getDistance(lat1, lon1, lat2, lon2) {
+    const R = 6371e3; // Earth's radius in meters
+    const φ1 = (lat1 * Math.PI) / 180;
+    const φ2 = (lat2 * Math.PI) / 180;
+    const Δφ = ((lat2 - lat1) * Math.PI) / 180;
+    const Δλ = ((lon2 - lon1) * Math.PI) / 180;
+
+    const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+              Math.cos(φ1) * Math.cos(φ2) *
+              Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c; // Distance in meters
+}

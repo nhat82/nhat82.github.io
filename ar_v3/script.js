@@ -59,7 +59,7 @@ window.onload = () => {
 
                 console.log("Nearest Plants:", plants);
 
-                plantList.innerHTML = "";
+                // plantList.innerHTML = "";
                 plants.forEach(plant => {
                     const plantMarker = document.createElement("a-box");
                     plantMarker.setAttribute("scale", "0.1 0.1 0.1");
@@ -86,7 +86,7 @@ window.onload = () => {
             .catch(err => console.error("Error loading CSV:", err));
     }, (error) => {
         console.error("Error obtaining geolocation:", error);
-    }, { enableHighAccuracy: true, maximumAge: 0, timeout: 5000 });
+    }, { enableHighAccuracy: true, maximumAge: 0, timeout: 2000 });
 };
 
 

@@ -18,7 +18,7 @@ window.onload = () => {
     const scene = document.querySelector("a-scene");
     const userLocation = document.getElementById('user-location');
     // const camera = document.querySelector("[gps-new-camera]");
-    const plantList = document.getElementById('plant-list');
+    // const plantList = document.getElementById('plant-list');
 
     if (!navigator.geolocation) {
         userLocation.textContent = "Geolocation is not supported by your browser.";
@@ -32,7 +32,7 @@ window.onload = () => {
         userLocation.textContent = `Lat: ${userLat}, Lon: ${userLon}`;
 
         const userMarker = document.createElement("a-box");
-        userMarker.setAttribute("scale", "1 1 1");
+        userMarker.setAttribute("scale", "0.2 0.2 0.2");
         userMarker.setAttribute("material", "color: red");
         userMarker.setAttribute("gps-new-entity-place", `latitude: ${userLat}; longitude: ${userLon}`);
         userMarker.setAttribute("id", "userDot");
@@ -62,7 +62,7 @@ window.onload = () => {
                 plantList.innerHTML = "";
                 plants.forEach(plant => {
                     const plantMarker = document.createElement("a-box");
-                    plantMarker.setAttribute("scale", "1 1 1");
+                    plantMarker.setAttribute("scale", "0.1 0.1 0.1");
                     plantMarker.setAttribute("material", "color: blue");
                     plantMarker.setAttribute("gps-new-entity-place", `latitude: ${plant.lat}; longitude: ${plant.lon}`);
                     plantMarker.setAttribute("position", "0 1 0");
@@ -78,9 +78,9 @@ window.onload = () => {
                     plantMarker.setAttribute("click-info-display", "");
                     scene.appendChild(plantMarker);
                     
-                    const listItem = document.createElement('li');
-                    listItem.innerText = `${plant.cname1 || "N/A"} ${plant.cname2 || ""} ${plant.cname3 || ""} - Genus: ${plant.genus || "N/A"}, Species: ${plant.species || "N/A"}, Cultivar: ${plant.cultivar || "N/A"} (${plant.distance.toFixed(2)}m)`;
-                    plantList.appendChild(listItem);
+                    // const listItem = document.createElement('li');
+                    // listItem.innerText = `${plant.cname1 || "N/A"} ${plant.cname2 || ""} ${plant.cname3 || ""} - Genus: ${plant.genus || "N/A"}, Species: ${plant.species || "N/A"}, Cultivar: ${plant.cultivar || "N/A"} (${plant.distance.toFixed(2)}m)`;
+                    // plantList.appendChild(listItem);
                 });
             })
             .catch(err => console.error("Error loading CSV:", err));

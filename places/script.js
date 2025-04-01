@@ -21,7 +21,7 @@ window.onload = () => {
             const places = loadPlaces();
             places.forEach((place) => {
                 const placeText = document.createElement('a-link');
-                placeText.setAttribute('gps-entity-place', `latitude: ${place.latitude}; longitude: ${place.longitude};`);
+                placeText.setAttribute('gps-entity-place', `latitude: ${userLat}; longitude: ${userLon};`);
                 placeText.setAttribute('title', place.name);
                 placeText.setAttribute('scale', '15 15 15');
                 placeText.setAttribute('href', place.link);

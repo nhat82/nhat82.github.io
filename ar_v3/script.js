@@ -16,6 +16,7 @@ window.onload = () => {
     
     const scene = document.querySelector("a-scene");
     const userLocation = document.getElementById('user-location');
+    const plantList = document.getElementById('plant-list');
 
     if (!navigator.geolocation) {
         userLocation.textContent = "Geolocation is not supported by your browser.";
@@ -56,7 +57,7 @@ window.onload = () => {
 
                 console.log("Nearest Plants:", plants);
 
-                // plantList.innerHTML = "";
+                plantList.innerHTML = `Total Plants Found: ${plants.length}`;
                 plants.forEach(plant => {
                     const plantMarker = document.createElement("a-box");
                     plantMarker.setAttribute("scale", "0.1 0.1 0.1");

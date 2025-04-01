@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- <meta name="viewport" content="width=device-width, initial-scale=1.0"> -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>AR.js A-Frame Location-based</title>
     <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ar.js@1.7.2/aframe/build/aframe-ar.min.js"></script>
@@ -28,7 +29,7 @@
             top: 0;
             left: 0;
             width: 100%;
-            height: 80%;
+            height: 90%;
             background: black;
         }
 
@@ -38,7 +39,7 @@
             bottom: 0;
             left: 0;
             width: 100%;
-            height: 20%;
+            height: 10%;
             background: white;
             padding: 10px;
             display: flex;
@@ -77,7 +78,7 @@
     <div id="info-container">
         <p>Plants V3 🌺</p>
         <p id="user-location">Fetching data...</p>
-        <!-- <ol id="plant-list"> Closest plants </ol> -->
+        <ol id="plant-list"> Closest plants </ol>
         <div id="info">
             Click a box to see info here.
         </div>

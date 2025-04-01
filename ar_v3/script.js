@@ -31,10 +31,10 @@ window.onload = () => {
         // Create user marker
         const userMarker = document.createElement("a-box");
         userMarker.setAttribute("scale", "0.2 0.2 0.2");
-        userMarker.setAttribute("material", "color: red");
+        userMarker.setAttribute("material", "color: red", "opacity: 0.5");
         userMarker.setAttribute("gps-new-entity-place", `latitude: ${userLat}; longitude: ${userLon}`);
         userMarker.setAttribute("id", "userDot");
-        userMarker.setAttribute("click-info-display", "");
+        // userMarker.setAttribute("click-info-display", "");
         scene.appendChild(userMarker);
 
         fetch("../ABG.csv")

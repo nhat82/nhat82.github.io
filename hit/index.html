@@ -60,11 +60,11 @@
 <body>
     <a-scene vr-mode-ui="enabled: false" arjs="sourceType: webcam; sourceWidth:1280; sourceHeight:960; displayWidth:1280; displayHeight:960; videoTexture: true; debugUIEnabled: false" renderer="antialias: true; alpha: true">
         <a-camera arjs-device-orientation-controls='smoothingFactor: 0.1' gps-new-camera='gpsMinDistance: 5'> </a-camera>
-            <!-- Dot for user's location (will update dynamically) -->
+            <a-cursor></a-cursor>
         <a-entity id="user-dot" 
             geometry="primitive: sphere; radius: 0.1" 
             material="color: red" 
-            gps-entity-place="longitude: 0; latitude: 0;">
+            position="0 0 0">
         </a-entity>
     </a-scene>
     

@@ -34,6 +34,13 @@ window.onload = () => {
             console.log('⏳ Waiting for A-Frame scene to load...');
             scene.addEventListener('loaded', setupAfterSceneLoaded);
         }
+
+        // Set up orientation tracking for the compass
+        if (window.DeviceOrientationEvent) {
+            window.addEventListener("deviceorientationabsolute", handleOrientation, true);
+        } else {
+            console.error("❌ Device Orientation API not supported.");
+        }
         
         // Set up button event listeners
         calibrateBtn.addEventListener('click', completeCalibration);
@@ -51,7 +58,62 @@ window.onload = () => {
             userLocationElement.textContent = 'Location: Not available (Geolocation not supported)';
         }
     }
-    
+
+
+
+    function handleOrientation(event) {
+        if (event.absolute && event.alpha !== null) {
+            let heading = (360 - event.alpha + compassOffset) % 360;
+            currentHeading = heading;
+
+            updateCompassUI();
+        }
+    }
+
+    function updateCompassUI() {
+        if (calibrationHeadingDisplay) {
+            calibrationHeadingDisplay.textContent = `Current Heading: ${Math.round(currentHeading)}°`;
+        }
+        if (compassNeedle) {
+            compassNeedle.style.transform = `rotate(${currentHeading}deg)`;
+        }
+        if (infoCompassNeedle) {
+            infoCompassNeedle.style.transform = `rotate(${currentHeading}deg)`;
+        }
+        if (headingElement) {
+            headingElement.textContent = `Heading: ${Math.round(currentHeading)}°`;
+        }
+    }
+
+
+    function completeCalibration() {
+        compassOffset = (360 - currentHeading) % 360;
+        localStorage.setItem('compassOffset', compassOffset);
+        console.log('✅ Calibration complete. Offset:', compassOffset);
+        calibrationPanel.style.display = 'none';
+        infoContainer.style.display = 'block';
+    }
+
+    function showCalibration() {
+        calibrationPanel.style.display = 'flex';
+        infoContainer.style.display = 'none';
+    }
+
+    function updatePosition(position) {
+        currentPosition = {
+            lat: position.coords.latitude,
+            lng: position.coords.longitude
+        };
+        userLocationElement.textContent = `Location: ${currentPosition.lat.toFixed(6)}, ${currentPosition.lng.toFixed(6)}`;
+    }
+
+    function handleLocationError(error) {
+        console.error('❌ Location error:', error);
+        userLocationElement.textContent = `Location error: ${error.message}`;
+    }
+
+
+
     function setupAfterSceneLoaded() {
         console.log('🎬 A-Frame scene loaded, setting up camera and orientation tracking');
         

@@ -9,16 +9,16 @@ window.onload = () => {
     const headingElement = document.getElementById('heading');
     const selectedPlantInfoElement = document.getElementById('selected-plant-info');
     const plantListElement = document.getElementById('plant-list');
-    const compassNeedle = document.getElementById('compass-needle');
-    const infoCompassNeedle = document.getElementById('info-compass-needle');
-    const compassCircle = document.querySelector(".compass-circle");
-    const startBtn = document.querySelector(".start-btn");
-    const myPoint = document.querySelector(".my-point");
-    let compass;
-    const isIOS = !(
-      navigator.userAgent.match(/(iPod|iPhone|iPad)/) &&
-      navigator.userAgent.match(/AppleWebKit/)
-    );
+    // const compassNeedle = document.getElementById('compass-needle');
+    // const infoCompassNeedle = document.getElementById('info-compass-needle');
+    // const compassCircle = document.querySelector(".compass-circle");
+    // const startBtn = document.querySelector(".start-btn");
+    // // const myPoint = document.querySelector(".my-point");
+    // let compass;
+    // const isIOS = !(
+    //   navigator.userAgent.match(/(iPod|iPhone|iPad)/) &&
+    //   navigator.userAgent.match(/AppleWebKit/)
+    // );
     
     // State variables
     let currentHeading = 0;
@@ -43,12 +43,12 @@ window.onload = () => {
             scene.addEventListener('loaded', setupAfterSceneLoaded);
         }
 
-        // Set up orientation tracking for the compass
-        if (window.DeviceOrientationEvent) {
-            window.addEventListener("deviceorientationabsolute", handleOrientation, true);
-        } else {
-            console.error("❌ Device Orientation API not supported.");
-        }
+        // // Set up orientation tracking for the compass
+        // if (window.DeviceOrientationEvent) {
+        //     window.addEventListener("deviceorientationabsolute", handleOrientation, true);
+        // } else {
+        //     console.error("❌ Device Orientation API not supported.");
+        // }
 
         // Set up button event listeners
         calibrateBtn.addEventListener('click', completeCalibration);
@@ -59,7 +59,7 @@ window.onload = () => {
             navigator.geolocation.watchPosition(updatePosition, handleLocationError, {
                 enableHighAccuracy: true,
                 maximumAge: 0,
-                timeout: 5000
+                timeout: 2000
             });
         } else {
             console.error('❌ Geolocation not supported by this browser');
@@ -67,31 +67,29 @@ window.onload = () => {
         }
     }
 
+    // function handleOrientation(event) {
+    //     if (event.absolute && event.alpha !== null) {
+    //         let heading = (360 - event.alpha + compassOffset) % 360;
+    //         currentHeading = heading;
 
+    //         updateCompassUI();
+    //     }
+    // }
 
-    function handleOrientation(event) {
-        if (event.absolute && event.alpha !== null) {
-            let heading = (360 - event.alpha + compassOffset) % 360;
-            currentHeading = heading;
-
-            updateCompassUI();
-        }
-    }
-
-    function updateCompassUI() {
-        if (calibrationHeadingDisplay) {
-            calibrationHeadingDisplay.textContent = `Current Heading: ${Math.round(currentHeading)}°`;
-        }
-        if (compassNeedle) {
-            compassNeedle.style.transform = `rotate(${currentHeading}deg)`;
-        }
-        if (infoCompassNeedle) {
-            infoCompassNeedle.style.transform = `rotate(${currentHeading}deg)`;
-        }
-        if (headingElement) {
-            headingElement.textContent = `Heading: ${Math.round(currentHeading)}°`;
-        }
-    }
+    // function updateCompassUI() {
+    //     if (calibrationHeadingDisplay) {
+    //         calibrationHeadingDisplay.textContent = `Current Heading: ${Math.round(currentHeading)}°`;
+    //     }
+    //     if (compassNeedle) {
+    //         compassNeedle.style.transform = `rotate(${currentHeading}deg)`;
+    //     }
+    //     if (infoCompassNeedle) {
+    //         infoCompassNeedle.style.transform = `rotate(${currentHeading}deg)`;
+    //     }
+    //     if (headingElement) {
+    //         headingElement.textContent = `Heading: ${Math.round(currentHeading)}°`;
+    //     }
+    // }
 
 
     function completeCalibration() {
@@ -119,7 +117,6 @@ window.onload = () => {
         console.error('❌ Location error:', error);
         userLocationElement.textContent = `Location error: ${error.message}`;
     }
-
 
 
     function setupAfterSceneLoaded() {

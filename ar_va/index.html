@@ -44,19 +44,6 @@
         scene.appendChild(camera);
         document.body.appendChild(scene);
 
-        scene.addEventListener('loaded', () => {
-            scene.addEventListener('frame', () => {
-                const rot = camera.getAttribute('rotation');
-                heading = rot.y;
-                headingDisplay.textContent = `Current Heading: ${Math.round(heading)}°`;
-            });
-        });
-
-        button.addEventListener('click', () => {
-            const offset = (360 - heading + 360) % 360;
-            localStorage.setItem('calibrationOffset', offset);
-            window.location.href = 'ar.html';
-        });
     </script>
 </body>
 

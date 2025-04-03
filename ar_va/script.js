@@ -70,14 +70,24 @@ window.onload = () => {
           // Update UI list
           plantList.innerHTML = "";
           plants.forEach(plant => {
-            const marker = document.createElement("a-box");
-            marker.setAttribute("scale", "0.5 0.2 0.5");
-            marker.setAttribute("material", "color: blue");
-            marker.setAttribute("gps-new-entity-place", `latitude: ${plant.lat}; longitude: ${plant.lon}`);
-            marker.setAttribute("position", "0 1 0");
-            marker.setAttribute("class", "clickable");
-
-            marker.addEventListener("click", () => {
+            const plantMarker = document.createElement("a-box");
+            plantMarker.setAttribute("scale", "0.2 0.2 0.2");
+            plantMarker.setAttribute("material", "color: blue");
+            plantMarker.setAttribute("gps-new-entity-place", `latitude: ${plant.lat}; longitude: ${plant.lon}`);
+            plantMarker.setAttribute("position", "0 1 0");
+          
+            // Calculate the angle between the user and the plant
+            const angleToPlant = getAngleToPlant(userLat, userLon, plant.lat, plant.lon);
+            
+            // Adjust plant marker's rotation based on the heading
+            const adjustedRotation = angleToPlant - heading; // Align the plant relative to the user's heading
+            plantMarker.setAttribute("rotation", `0 ${adjustedRotation} 0`);  // Rotate around the Y-axis
+          
+            plantMarker.setAttribute("class", "clickable");
+            plantMarker.setAttribute("event-set__enter", "_event: mouseenter; material.color: yellow");
+            plantMarker.setAttribute("event-set__leave", "_event: mouseleave; material.color: blue");
+          
+            plantMarker.addEventListener("click", () => {
               selectedPlantInfo.innerHTML = `
                 🌱 <strong>${plant.cname1 || "Unknown"}</strong><br>
                 Genus: ${plant.genus || "N/A"}<br>
@@ -85,9 +95,9 @@ window.onload = () => {
                 Distance: ${plant.distance.toFixed(1)} meters
               `;
             });
-
-            scene.appendChild(marker);
-            blueMarkers.push(marker);
+          
+            scene.appendChild(plantMarker);
+            blueMarkers.push(plantMarker);
 
             const listItem = document.createElement("li");
             listItem.innerText = `${plant.cname1 || "N/A"} - Genus: ${plant.genus}, Species: ${plant.species} (${plant.distance.toFixed(1)}m)`;
@@ -134,3 +144,11 @@ function getDistance(lat1, lon1, lat2, lon2) {
 
   return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
 }
+
+function getAngleToPlant(lat1, lon1, lat2, lon2) {
+    const deltaLon = lon2 - lon1;
+    const deltaLat = lat2 - lat1;
+  
+    const angle = Math.atan2(deltaLat, deltaLon) * (180 / Math.PI);
+    return angle < 0 ? angle + 360 : angle; // Normalize angle to be between 0 and 360
+  }

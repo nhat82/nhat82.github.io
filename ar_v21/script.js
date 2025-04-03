@@ -340,29 +340,32 @@ window.onload = () => {
         });
 
         // Add some points of interest with red markers if needed
-        // addPointsOfInterest();
+        addPointsOfInterest();
     }
 
-    // function addPointsOfInterest() {
-    //     if (!currentPosition) return;
+    function addPointsOfInterest() {
+        if (!currentPosition) return;
     
-    //     const scene = document.querySelector('a-scene');
+        const scene = document.querySelector('a-scene');
     
-    //     // Remove existing user location marker if any
-    //     const existingUserMarker = document.getElementById("user-location-marker");
-    //     if (existingUserMarker) {
-    //         existingUserMarker.parentNode.removeChild(existingUserMarker);
-    //     }
+        // Remove existing user location marker if any
+        const existingUserMarker = document.getElementById("user-location-marker");
+        if (existingUserMarker) {
+            existingUserMarker.parentNode.removeChild(existingUserMarker);
+        }
     
-    //     // Create a new marker for the user's current location
-    //     const userMarker = document.createElement("a-sphere");
-    //     userMarker.setAttribute("scale", "0.2 0.2 0.2");
-    //     userMarker.setAttribute("material", "color: red");
-    //     userMarker.setAttribute("gps-new-entity-place", `latitude: ${currentPosition.lat}; longitude: ${currentPosition.lng}`);
-    //     userMarker.setAttribute("id", "user-location-marker");
-    
-    //     scene.appendChild(userMarker);
-    // }
+        // Create a new marker for the user's current location
+        const userMarker = document.createElement("a-sphere");
+        userMarker.setAttribute("scale", "0.2 0.2 0.2");
+        userMarker.setAttribute("material", "color: red");
+        userMarker.setAttribute("gps-new-entity-place", `latitude: ${currentPosition.lat}; longitude: ${currentPosition.lng}`);
+        userMarker.setAttribute("id", "user-location-marker");
+        // Add click event to show plant info
+        userMarker.addEventListener('click', () => {
+            displayCurrentUser();
+        });
+        scene.appendChild(userMarker);
+    }
     
 
     function updatePlantsList() {
@@ -395,5 +398,9 @@ window.onload = () => {
             <p>Distance: ${plant.distance.toFixed(1)}m</p>
             <p>ID: ${plant.s_id}</p>
         `;
+    }
+    
+    function displayCurrentUser() {
+        selectedPlantInfoElement.innerHTML = `You clicked yourself :)`;
     }
 };

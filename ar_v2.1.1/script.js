@@ -3,7 +3,7 @@ window.onload = () => {
 
   const scene = document.querySelector('a-scene');
   const userLocation = document.getElementById('user-location');
-  const camera = document.querySelector('[gps-new-camera]');
+  const camera = document.querySelector('[gps-camera]');
   const plantList = document.getElementById('plant-list');
   const headingDisplay = document.getElementById('heading');
   const selectedPlantInfo = document.getElementById('selected-plant-info');
@@ -38,7 +38,7 @@ window.onload = () => {
       userMarker.setAttribute("material", "color: red");
       scene.appendChild(userMarker);
     }
-    userMarker.setAttribute("gps-new-entity-place", `latitude: ${userLat}; longitude: ${userLon}`);
+    userMarker.setAttribute("gps-entity-place", `latitude: ${userLat}; longitude: ${userLon}`);
 
     // 🔁 Remove old blue markers
     blueMarkers.forEach(marker => scene.removeChild(marker));
@@ -69,12 +69,11 @@ window.onload = () => {
             const plantMarker = document.createElement("a-box");
             plantMarker.setAttribute("scale", "0.2 0.2 0.2");
             plantMarker.setAttribute("material", "color: blue");
-            plantMarker.setAttribute("gps-new-entity-place", `latitude: ${plant.lat}; longitude: ${plant.lon}`);
+            plantMarker.setAttribute("gps-entity-place", `latitude: ${plant.lat}; longitude: ${plant.lon}`);
             plantMarker.setAttribute("position", "0 0 0");
-            
             plantMarker.setAttribute("class", "clickable");
-            plantMarker.setAttribute("event-set__enter", "_event: mouseenter; material.color: yellow");
-            plantMarker.setAttribute("event-set__leave", "_event: mouseleave; material.color: blue");
+            // plantMarker.setAttribute("event-set__enter", "_event: mouseenter; material.color: yellow");
+            // plantMarker.setAttribute("event-set__leave", "_event: mouseleave; material.color: blue");
             
             plantMarker.addEventListener("click", () => {
               const info = `

@@ -39,6 +39,10 @@ window.onload = () => {
       scene.appendChild(userMarker);
     }
     userMarker.setAttribute("gps-entity-place", `latitude: ${userLat}; longitude: ${userLon}`);
+    userMarker.addEventListener("click", () => {
+      const info = `You clicked yourself!`;
+      selectedPlantInfo.innerHTML = info;
+    });
 
     // 🔁 Remove old blue markers
     blueMarkers.forEach(marker => scene.removeChild(marker));

@@ -264,7 +264,7 @@ window.onload = () => {
             console.log(`🌿 Creating marker for plant: ${plant.cname1}, Lat: ${plant.lat}, Lon: ${plant.lon}`);
 
             const plantMarker = document.createElement("a-box");
-            plantMarker.setAttribute("scale", "0.1 0.1 0.1");
+            plantMarker.setAttribute("scale", "0.5 0.5 0.5");
             plantMarker.setAttribute("material", "color: blue");
             plantMarker.setAttribute("gps-new-entity-place", `latitude: ${plant.lat}; longitude: ${plant.lon}`);
             plantMarker.setAttribute("id", `plantDot-${plant.s_id}`); // Unique ID
@@ -282,33 +282,26 @@ window.onload = () => {
     }
 
     function addPointsOfInterest() {
-        // Optional: Add any fixed points of interest
-        // For example, visitor centers, entrances, etc.
         if (!currentPosition) return;
-        
+    
         const scene = document.querySelector('a-scene');
-        const pois = [
-            { name: "Visitor Center", lat: currentPosition.lat + 0.0003, lon: currentPosition.lng + 0.0003 },
-            { name: "Garden Entrance", lat: currentPosition.lat - 0.0003, lon: currentPosition.lng - 0.0001 }
-        ];
-        
-        pois.forEach((poi, index) => {
-            const entity = document.createElement('a-box');
-            entity.setAttribute("scale", "0.1 0.1 0.1");
-            entity.setAttribute('material', 'color: red');
-            entity.setAttribute('gps-new-entity-place', `latitude: ${poi.lat}; longitude: ${poi.lon}`);
-            entity.setAttribute("id", `poi-${index}`); // Unique ID
-            
-            entity.addEventListener('click', () => {
-                selectedPlantInfoElement.innerHTML = `
-                    <h4>${poi.name}</h4>
-                    <p>Point of Interest</p>
-                `;
-            });
-            
-            scene.appendChild(entity);
-        });
+    
+        // Remove existing user location marker if any
+        const existingUserMarker = document.getElementById("user-location-marker");
+        if (existingUserMarker) {
+            existingUserMarker.parentNode.removeChild(existingUserMarker);
+        }
+    
+        // Create a new marker for the user's current location
+        const userMarker = document.createElement("a-sphere");
+        userMarker.setAttribute("scale", "0.2 0.2 0.2");
+        userMarker.setAttribute("material", "color: yellow");
+        userMarker.setAttribute("gps-new-entity-place", `latitude: ${currentPosition.lat}; longitude: ${currentPosition.lng}`);
+        userMarker.setAttribute("id", "user-location-marker");
+    
+        scene.appendChild(userMarker);
     }
+    
 
     function updatePlantsList() {
         // Update count and list in UI

@@ -17,26 +17,23 @@ window.onload = () => {
     let currentPosition = null;
     let plants = [];
 
-    // Initialize the application
-    window.addEventListener('load', initializeApp);
+    // Initialize the application - immediately, not with another event listener
+    initializeApp();
 
     function initializeApp() {
+        console.log('🚀 Initializing app...');
+        
         // Set up orientation tracking for the calibration compass
-        const camera = document.querySelector('a-camera');
+        // Wait for A-Frame to be ready
+        const scene = document.querySelector('a-scene');
         
-        // Set up camera with any existing calibration
-        const existingOffset = parseFloat(localStorage.getItem('calibrationOffset') || '0');
-        camera.setAttribute('gps-new-camera', {
-            gpsMinDistance: 5,
-            rotate: true,
-            rotationOffset: existingOffset
-        });
-        console.log('✅ Applied rotationOffset from calibration:', existingOffset);
-        
-        // Set up orientation tracking for both compasses
-        document.querySelector('a-scene').addEventListener('loaded', () => {
-            document.querySelector('a-scene').addEventListener('frame', updateOrientation);
-        });
+        if (scene.hasLoaded) {
+            console.log('✅ A-Frame scene already loaded');
+            setupAfterSceneLoaded();
+        } else {
+            console.log('⏳ Waiting for A-Frame scene to load...');
+            scene.addEventListener('loaded', setupAfterSceneLoaded);
+        }
         
         // Set up button event listeners
         calibrateBtn.addEventListener('click', completeCalibration);
@@ -49,9 +46,36 @@ window.onload = () => {
                 maximumAge: 0,
                 timeout: 5000
             });
+        } else {
+            console.error('❌ Geolocation not supported by this browser');
+            userLocationElement.textContent = 'Location: Not available (Geolocation not supported)';
+        }
+    }
+    
+    function setupAfterSceneLoaded() {
+        console.log('🎬 A-Frame scene loaded, setting up camera and orientation tracking');
+        
+        // Set up camera with any existing calibration
+        const camera = document.querySelector('a-camera');
+        if (!camera) {
+            console.error('❌ Camera element not found');
+            return;
         }
         
-        // Force layout reflow after a short delay
+        const existingOffset = parseFloat(localStorage.getItem('calibrationOffset') || '0');
+        camera.setAttribute('gps-new-camera', {
+            gpsMinDistance: 5,
+            rotate: true,
+            rotationOffset: existingOffset
+        });
+        console.log('✅ Applied rotationOffset from calibration:', existingOffset);
+        
+        // Set up the orientation tracking for both compasses
+        // Use the tick event instead of frame for more reliable updates
+        const scene = document.querySelector('a-scene');
+        scene.addEventListener('tick', updateOrientation);
+        
+        // Force layout reflow
         setTimeout(() => {
             window.dispatchEvent(new Event('resize'));
             console.log('🔁 Forced layout resize');
@@ -61,15 +85,27 @@ window.onload = () => {
     function updateOrientation() {
         try {
             const camera = document.querySelector('a-camera');
+            if (!camera) return;
+            
             const rot = camera.getAttribute('rotation');
+            if (!rot) return;
+            
             currentHeading = rot.y;
             
             // Update calibration compass
-            calibrationHeadingDisplay.textContent = `Current Heading: ${Math.round(currentHeading)}°`;
-            compassNeedle.style.transform = `rotate(${currentHeading}deg)`;
+            if (calibrationHeadingDisplay) {
+                calibrationHeadingDisplay.textContent = `Current Heading: ${Math.round(currentHeading)}°`;
+            }
+            
+            if (compassNeedle) {
+                compassNeedle.style.transform = `rotate(${currentHeading}deg)`;
+            }
             
             // Update info panel compass
-            headingElement.textContent = `Heading: ${Math.round(currentHeading)}°`;
+            if (headingElement) {
+                headingElement.textContent = `Heading: ${Math.round(currentHeading)}°`;
+            }
+            
             if (infoCompassNeedle) {
                 infoCompassNeedle.style.transform = `rotate(${currentHeading}deg)`;
             }
@@ -126,12 +162,13 @@ window.onload = () => {
     }
 
     function handleLocationError(error) {
+        console.error('❌ Location error:', error);
         userLocationElement.textContent = `Location error: ${error.message}`;
     }
 
     function loadPlantsFromCSV() {
         if (!currentPosition) {
-            console.error("Can't load plants: No position available");
+            console.error("❌ Can't load plants: No position available");
             return;
         }
         
@@ -144,7 +181,7 @@ window.onload = () => {
                 return response.text();
             })
             .then(csvText => {
-                console.log("CSV Loaded Successfully!");
+                console.log("✅ CSV Loaded Successfully!");
                 plants = parseCSV(csvText);
 
                 plants = plants
@@ -156,7 +193,7 @@ window.onload = () => {
                     .sort((a, b) => a.distance - b.distance)
                     .slice(0, 10);  // Show top 10 closest plants
 
-                console.log("Nearest Plants:", plants);
+                console.log("🌱 Nearest Plants:", plants);
                 
                 // Clear existing plants/markers
                 clearExistingPlantMarkers();
@@ -168,7 +205,7 @@ window.onload = () => {
                 createPlantMarkers();
             })
             .catch(err => {
-                console.error("Error loading CSV:", err);
+                console.error("❌ Error loading CSV:", err);
                 selectedPlantInfoElement.innerHTML = `<p>Error loading plant data: ${err.message}</p>`;
             });
     }
@@ -212,16 +249,19 @@ window.onload = () => {
 
     function clearExistingPlantMarkers() {
         // Remove existing plant markers
-        const scene = document.querySelector('a-scene');
         const existingMarkers = document.querySelectorAll('[id^="plantDot-"]');
-        existingMarkers.forEach(marker => scene.removeChild(marker));
+        existingMarkers.forEach(marker => {
+            if (marker.parentNode) {
+                marker.parentNode.removeChild(marker);
+            }
+        });
     }
 
     function createPlantMarkers() {
         const scene = document.querySelector('a-scene');
         
         plants.forEach(plant => {
-            console.log(`Creating marker for plant: ${plant.cname1}, Lat: ${plant.lat}, Lon: ${plant.lon}`);
+            console.log(`🌿 Creating marker for plant: ${plant.cname1}, Lat: ${plant.lat}, Lon: ${plant.lon}`);
 
             const plantMarker = document.createElement("a-box");
             plantMarker.setAttribute("scale", "0.1 0.1 0.1");
@@ -301,4 +341,4 @@ window.onload = () => {
             <p>ID: ${plant.s_id}</p>
         `;
     }
-}
+};

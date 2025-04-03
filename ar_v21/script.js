@@ -11,7 +11,15 @@ window.onload = () => {
     const plantListElement = document.getElementById('plant-list');
     const compassNeedle = document.getElementById('compass-needle');
     const infoCompassNeedle = document.getElementById('info-compass-needle');
-
+    const compassCircle = document.querySelector(".compass-circle");
+    const startBtn = document.querySelector(".start-btn");
+    const myPoint = document.querySelector(".my-point");
+    let compass;
+    const isIOS = !(
+      navigator.userAgent.match(/(iPod|iPhone|iPad)/) &&
+      navigator.userAgent.match(/AppleWebKit/)
+    );
+    
     // State variables
     let currentHeading = 0;
     let currentPosition = null;
@@ -41,7 +49,10 @@ window.onload = () => {
         } else {
             console.error("❌ Device Orientation API not supported.");
         }
-        
+
+        // 2nd Compass
+        init();
+
         // Set up button event listeners
         calibrateBtn.addEventListener('click', completeCalibration);
         recalibrateBtn.addEventListener('click', showCalibration);
@@ -403,4 +414,31 @@ window.onload = () => {
     function displayCurrentUser() {
         selectedPlantInfoElement.innerHTML = `You clicked yourself :)`;
     }
+
+
+    function init() {
+        startBtn.addEventListener("click", startCompass);
+      }
+      
+      function startCompass() {
+        if (isIOS) {
+          DeviceOrientationEvent.requestPermission()
+            .then((response) => {
+              if (response === "granted") {
+                window.addEventListener("deviceorientation", handler, true);
+              } else {
+                alert("has to be allowed!");
+              }
+            })
+            .catch(() => alert("not supported"));
+        } else {
+          window.addEventListener("deviceorientationabsolute", handler, true);
+        }
+      }
+      
+      function handler(e) {
+        compass = e.webkitCompassHeading || Math.abs(e.alpha - 360);
+        compassCircle.style.transform = `translate(-50%, -50%) rotate(${-compass}deg)`;
+      }
+      
 };

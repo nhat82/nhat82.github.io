@@ -30,7 +30,7 @@ window.onload = () => {
 
         // Create user marker
         const userMarker = document.createElement("a-box");
-        userMarker.setAttribute("scale", "1 1 1");
+        userMarker.setAttribute("scale", "0.1 0.1 0.1");
         userMarker.setAttribute("material", "color: red", "opacity: 0.5");
         userMarker.setAttribute("gps-new-entity-place", `latitude: ${userLat}; longitude: ${userLon}`);
         userMarker.setAttribute("id", "userDot");
@@ -63,11 +63,11 @@ window.onload = () => {
                     console.log(`Plant: ${plant.cname1}, Lat: ${plant.lat}, Lon: ${plant.lon}`);
 
                     const plantMarker = document.createElement("a-box");
-                    plantMarker.setAttribute("scale", "1 1 1");
+                    plantMarker.setAttribute("scale", "0.1 0.1 0.1");
                     plantMarker.setAttribute("material", "color: blue");
                     plantMarker.setAttribute("gps-new-entity-place", `latitude: ${plant.lat}; longitude: ${plant.lon}`);
                     plantMarker.setAttribute("id", `plantDot-${plant.s_id}`); // Unique ID
-                    plantMarker.setAttribute("position", "0 1 0");
+                    // plantMarker.setAttribute("position", "0 1 0");
                     // plantMarker.setAttribute("data-plant-info", `${plant.cname1 || "N/A"} - Genus: ${plant.genus || "N/A"}, Species: ${plant.species || "N/A"} (${plant.distance.toFixed(2)}m)`);
                     plantMarker.setAttribute("click-info-display", "");
                     // plantMarker.setAttribute("position", "0 1 0");

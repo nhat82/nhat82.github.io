@@ -3,7 +3,7 @@ window.onload = () => {
   const camera = document.querySelector('[gps-new-camera]');
   const offset = parseFloat(localStorage.getItem('calibrationOffset') || '0');
   camera.setAttribute('gps-new-camera', {
-    gpsMinDistance: 3,
+    gpsMinDistance: 2,
     rotate: true,
     rotationOffset: offset,
   });
@@ -40,28 +40,44 @@ window.onload = () => {
     });
   });
 
-  camera.addEventListener('gps-camera-update-position', (e) => {
-    const userLat = e.detail.position.latitude;
-    const userLon = e.detail.position.longitude;
-    userLocation.textContent = `Lat: ${userLat}, Lon: ${userLon}`;
+  // Use watchPosition to continuously track the user's location
+  if (navigator.geolocation) {
+    navigator.geolocation.watchPosition(
+      (position) => {
+        const userLat = position.coords.latitude;
+        const userLon = position.coords.longitude;
+        userLocation.textContent = `Lat: ${userLat}, Lon: ${userLon}`;
 
-    // Update or create the red user marker.
-    if (!userMarker) {
-      userMarker = document.createElement('a-entity');
-      userMarker.setAttribute("id", "user")
-      userMarker.setAttribute('gltf-model', './plants_media/hands.glb'); // or a URL like 'url(path/to/model.glb)'
-      userMarker.setAttribute('scale', '1 1 1');
-      scene.appendChild(userMarker);
-    }    
-    userMarker.setAttribute('gps-new-entity-place', `latitude: ${userLat}; longitude: ${userLon}`);
+        // Update or create the red user marker.
+        if (!userMarker) {
+          userMarker = document.createElement('a-entity');
+          userMarker.setAttribute("id", "user")
+          userMarker.setAttribute('gltf-model', './plants_media/hands.glb');
+          userMarker.setAttribute('look-at', '[gps-new-camera]');
+          userMarker.setAttribute('scale', '1 1 1');
+          scene.appendChild(userMarker);
+        }    
+        userMarker.setAttribute('gps-new-entity-place', `latitude: ${userLat}; longitude: ${userLon}`);
 
-    // Throttle the update of plant markers.
-    const now = Date.now();
-    if (now - lastMarkerUpdate > updateInterval) {
-      lastMarkerUpdate = now;
-      updatePlantMarkers(userLat, userLon);
-    }
-  });
+        // Throttle the update of plant markers.
+        const now = Date.now();
+        if (now - lastMarkerUpdate > updateInterval) {
+          lastMarkerUpdate = now;
+          updatePlantMarkers(userLat, userLon);
+        }
+      },
+      (err) => {
+        console.error('Error getting location:', err);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 5000,
+        maximumAge: 0
+      }
+    );
+  } else {
+    console.error('Geolocation is not supported by this browser.');
+  }
 
   function updatePlantMarkers(userLat, userLon) {
     fetch('./ABG.csv')
@@ -97,14 +113,6 @@ window.onload = () => {
           if (plantMarkers[plant.s_id]) {
             plantMarkers[plant.s_id].setAttribute('gps-new-entity-place', `latitude: ${plant.lat}; longitude: ${plant.lon}`);
           } else {
-            // const marker = document.createElement('a-image');
-            // marker.setAttribute('src', getEmojiImageURL(plant.cname1));
-            // marker.setAttribute('scale', '2 2 2');
-            // marker.setAttribute('position', `0 ${yPos} 0`);
-            // marker.setAttribute('material', 'transparent: true');
-            // marker.setAttribute('look-at', '[gps-new-camera]');
-            // marker.setAttribute('gps-new-entity-place', `latitude: ${plant.lat}; longitude: ${plant.lon}`);
-            // marker.setAttribute('class', 'clickable');
             const marker = document.createElement('a-entity');
             marker.setAttribute('gltf-model', './plants_media/tree.glb'); 
             marker.setAttribute('scale', '1 1 1');
@@ -141,7 +149,6 @@ window.onload = () => {
   }
 
   // --- Helpers ---
-
   function parseCSV(csvText) {
     const rows = csvText.split('\n').slice(1);
     return rows
@@ -190,25 +197,5 @@ window.onload = () => {
       Math.sin(Δφ / 2) ** 2 +
       Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) ** 2;
     return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
-  }
-
-  // Return image URL based on common plant names
-  function getEmojiImageURL(cname1) {
-    const lower = cname1.toLowerCase();
-    if (lower.includes('oak') || lower.includes('maple') || lower.includes('elm') || lower.includes('birch')) {
-      return './sprites/1f333.png'; // 🌳
-    } else if (lower.includes('fern')) {
-      return './sprites/1f33f.png'; // 🌿
-    } else if (lower.includes('grass') || lower.includes('reed')) {
-      return './sprites/1f33e.png'; // 🌾
-    } else if (lower.includes('flower') || lower.includes('rose') || lower.includes('daisy')) {
-      return './sprites/1f338.png'; // 🌸
-    } else if (lower.includes('shrub') || lower.includes('bush') || lower.includes('holly') || lower.includes('boxwood')) {
-      return './sprites/1f331.png'; // 🌱
-    } else if (lower.includes('cactus') || lower.includes('succulent')) {
-      return './sprites/1f335.png'; // 🌵
-    } else {
-      return './sprites/1fab4.png'; // 🪴 (default potted plant)
-    }
   }
 };

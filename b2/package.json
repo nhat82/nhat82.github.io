@@ -16,7 +16,7 @@
   "scripts": {
     "start": "parcel src/index.pug",
     "build": "parcel build src/index.pug --no-source-maps -d public",
-    "grok": "ngrok http 1234 -bind-tls=true"
+    "grok": "ngrok http 1234 --bind-tls=true"
   },
   "devDependencies": {
     "babel-preset-env": "^1.7.0",

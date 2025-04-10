@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import { ARButton } from "./lib/ARButton.js";
-// init three js
+import { preload, loadMesh, glbSrc } from "./lib/spawner.js";
+
 let container;
 let camera, scene, renderer;
 let controller;
@@ -9,26 +10,25 @@ let reticle, pointer;
 let hitTestSource = null;
 let hitTestSourceRequested = false;
 
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
+
 let isUI = false;
 let isTracked = false;
 let isStarted = false;
 let floater = null;
-let bouncers = [];
 
-let userLocation = { lat: 0, lon: 0 };  // User's current GPS location
+let userLocation = { lat: 0, lon: 0 };
+let deviceRotation = { x: 0, y: 0, z: 0 };
 
-// Array of plant objects loaded from CSV
-let plants = []; 
+let plants = [];
 fetch('../ABG.csv')  
   .then(response => response.text())
   .then(csvText => {
-    console.log(csvText); 
-    const plants = parseCSV(csvText);
+    plants = parseCSV(csvText);
     console.log("Successfully read csv");
   })
   .catch(error => console.error('Error loading ABG.csv:', error));
-
-
 
 const init = () => {
   container = document.createElement("div");
@@ -62,7 +62,6 @@ const init = () => {
 
   window.addEventListener("deviceorientation", handleOrientation, true);
 
-  // Get user's current location
   if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(
       (position) => {
@@ -80,42 +79,18 @@ const init = () => {
     console.log("Geolocation not supported");
   }
 
-  // Load plant models and display closest 5
-  const onSelect = () => {
-    if (isUI) {
-      isUI = false;
-    } else {
-      if (reticle.visible) {
-        const height = new THREE.Vector3().setFromMatrixPosition(
-          camera.matrixWorld
-        ).y;
-        const pos = new THREE.Vector3().setFromMatrixPosition(reticle.matrix);
-        const thing = icon.split("/")[3].split(".")[0];
-
-        let bouncer = new Bouncer(pos, height, thing);
-
-        scene.add(bouncer.mesh);
-        bouncers.push(bouncer);
-
-        const nav = document.querySelector("nav");
-        if (nav.classList.contains("hidden")) nav.classList.remove("hidden");
-      }
-    }
-  };
-
   controller = renderer.xr.getController(0);
-  controller.addEventListener("select", onSelect);
   scene.add(controller);
 
   reticle = new THREE.Mesh(
-    new THREE.RingBufferGeometry(0.15, 0.2, 32).rotateX(-Math.PI / 2),
+    new THREE.RingGeometry(0.15, 0.2, 32).rotateX(-Math.PI / 2),
     new THREE.MeshBasicMaterial()
   );
   reticle.matrixAutoUpdate = false;
   reticle.visible = false;
 
   pointer = new THREE.Mesh(
-    new THREE.SphereBufferGeometry(0.02),
+    new THREE.SphereGeometry(0.02),
     new THREE.MeshLambertMaterial({ color: 0xcccccc })
   );
   pointer.visible = false;
@@ -123,9 +98,10 @@ const init = () => {
   scene.add(pointer);
   scene.add(reticle);
 
+  renderer.domElement.addEventListener("click", onClick, false);
+
   window.addEventListener("resize", onWindowResize, false);
 
-  // Initial splash screen setup
   loadMesh(glbSrc.duck).then((mesh) => {
     scene.background = new THREE.Color(0x000000);
     floater = mesh.clone();
@@ -145,29 +121,41 @@ const init = () => {
   });
 };
 
-// Function to load the closest plants and render their models
+const onClick = (event) => {
+  mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+  mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+  raycaster.setFromCamera(mouse, camera);
+
+  const intersects = raycaster.intersectObjects(scene.children, true);
+  if (intersects.length > 0) {
+    const object = intersects[0].object;
+    if (object.userData.plant) {
+      displayPlantInfo(object.userData.plant);
+    }
+  }
+};
+
 const loadClosestPlants = () => {
-  // Get 5 closest plants
   const closestPlants = getClosestPlants(userLocation.lat, userLocation.lon, plants, 5);
 
   closestPlants.forEach((plant) => {
     loadMesh(`./plants_media/tree.glb`).then((mesh) => {
-      // Position the plant model at its GPS coordinates (converted to 3D world coordinates)
       const position = latLonTo3D(plant.lat, plant.lon);
-      mesh.position.set(position.x, 0, position.z); // Assuming flat ground (y = 0)
+      mesh.position.set(position.x, 0, position.z);
+      mesh.userData.plant = plant;
 
-      // Add the plant model to the scene
+      // Optional: give each mesh a name
+      mesh.name = plant.cname1;
+
+      // Optional: define custom onClick behavior (for future use)
+      mesh.onClick = () => displayPlantInfo(plant);
+
       scene.add(mesh);
-
-      // Add an event listener to display plant info when clicked
-      mesh.on('click', () => {
-        displayPlantInfo(plant);
-      });
     });
   });
 };
 
-// Function to calculate distance between two GPS points
+
 function getDistance(lat1, lon1, lat2, lon2) {
   const R = 6371e3;
   const φ1 = (lat1 * Math.PI) / 180;
@@ -183,7 +171,6 @@ function getDistance(lat1, lon1, lat2, lon2) {
   return R * c;
 }
 
-// Function to find the closest plants to the user's location
 function getClosestPlants(lat, lon, plants, n) {
   const plantsWithDistance = plants.map((plant) => {
     const distance = getDistance(lat, lon, plant.lat, plant.lon);
@@ -194,15 +181,13 @@ function getClosestPlants(lat, lon, plants, n) {
   return plantsWithDistance.slice(0, n).map((item) => item.plant);
 }
 
-// Function to convert lat/lon to 3D world coordinates (basic transformation)
 function latLonTo3D(lat, lon) {
-  const scale = 0.1;  // Scale factor for transforming GPS coordinates to 3D space
+  const scale = 0.1;
   const x = (lon - userLocation.lon) * scale;
   const z = (lat - userLocation.lat) * scale;
   return { x, z };
 }
 
-// Function to display the plant's information
 function displayPlantInfo(plant) {
   const infoPanel = document.querySelector(".info-panel");
   infoPanel.innerHTML = `
@@ -237,16 +222,14 @@ function render(timestamp, frame) {
       const referenceSpace = renderer.xr.getReferenceSpace();
       const session = renderer.xr.getSession();
 
-      if (hitTestSourceRequested === false) {
-        session.requestReferenceSpace("viewer").then(function (referenceSpace) {
-          session
-            .requestHitTestSource({ space: referenceSpace })
-            .then(function (source) {
-              hitTestSource = source;
-            });
+      if (!hitTestSourceRequested) {
+        session.requestReferenceSpace("viewer").then((referenceSpace) => {
+          session.requestHitTestSource({ space: referenceSpace }).then((source) => {
+            hitTestSource = source;
+          });
         });
 
-        session.addEventListener("end", function () {
+        session.addEventListener("end", () => {
           hitTestSourceRequested = false;
           hitTestSource = null;
         });
@@ -260,15 +243,9 @@ function render(timestamp, frame) {
           const hit = hitTestResults[0];
           reticle.visible = true;
           pointer.visible = true;
-          reticle.matrix.fromArray(
-            hit.getPose(referenceSpace).transform.matrix
-          );
-          const reticlePos = new THREE.Vector3().setFromMatrixPosition(
-            reticle.matrix
-          );
-          const cameraPos = new THREE.Vector3().setFromMatrixPosition(
-            camera.matrixWorld
-          );
+          reticle.matrix.fromArray(hit.getPose(referenceSpace).transform.matrix);
+          const reticlePos = new THREE.Vector3().setFromMatrixPosition(reticle.matrix);
+          const cameraPos = new THREE.Vector3().setFromMatrixPosition(camera.matrixWorld);
 
           pointer.position.copy(reticlePos);
           pointer.position.y = cameraPos.y;
@@ -287,14 +264,11 @@ function render(timestamp, frame) {
         }
       }
     }
-
   }
 
   renderer.render(scene, camera);
 }
 
-
-// Handle window resize event
 function onWindowResize() {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
@@ -302,51 +276,31 @@ function onWindowResize() {
 }
 
 function handleOrientation(event) {
-  var absolute = event.absolute;
-  var alpha = event.alpha;
-  var beta = event.beta;
-  var gamma = event.gamma;
-
-  deviceRotation.x = beta;
-  deviceRotation.y = gamma;
-  deviceRotation.z = alpha;
-}
-
-function preload() {
-  // Preload models (implement your preload logic here)
-  return Promise.resolve();
+  deviceRotation.x = event.beta;
+  deviceRotation.y = event.gamma;
+  deviceRotation.z = event.alpha;
 }
 
 function parseCSV(csvText) {
-  const rows = csvText.split("\n").slice(1); // Skip header row
-
+  const rows = csvText.split("\n").slice(1);
   return rows
-      .map(row => {
-          const columns = row.split(",");
-
-          while (columns.length < 9) columns.push(""); // Handle missing columns
-
-          return {
-              s_id: columns[0]?.trim(),
-              cname1: columns[1]?.trim() || "Unknown",
-              cname2: columns[2]?.trim() || "",
-              cname3: columns[3]?.trim() || "",
-              genus: columns[4]?.trim() || "Unknown",
-              species: columns[5]?.trim() || "",
-              cultivar: columns[6]?.trim() || "",
-              lon: parseFloat(columns[7]) || 0,
-              lat: parseFloat(columns[8]) || 0
-          };
-      })
-      .filter(plant => plant.s_id && plant.lat !== 0 && plant.lon !== 0);
+    .map(row => {
+      const columns = row.split(",");
+      while (columns.length < 9) columns.push("");
+      return {
+        s_id: columns[0] ? columns[0].trim() : "",
+        cname1: (columns[1] && columns[1].trim()) || "Unknown",
+        cname2: (columns[2] && columns[2].trim()) || "",
+        cname3: (columns[3] && columns[3].trim()) || "",
+        genus: (columns[4] && columns[4].trim()) || "Unknown",
+        species: (columns[5] && columns[5].trim()) || "",
+        cultivar: (columns[6] && columns[6].trim()) || "",
+        lon: parseFloat(columns[7]) || 0,
+        lat: parseFloat(columns[8]) || 0
+      };
+    })
+    .filter(plant => plant.s_id && plant.lat !== 0 && plant.lon !== 0);
 }
 
-
-// Run initialization
 init();
 animate();
-
-
-
-
-

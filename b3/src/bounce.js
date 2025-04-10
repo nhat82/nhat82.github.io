@@ -1,42 +1,5 @@
 import * as THREE from "three";
 import { ARButton } from "./lib/ARButton.js";
-import { Howl, Howler } from "howler";
-import { Bouncer } from "./lib/Bouncer.js";
-import { preload, loadMesh, glbSrc } from "./lib/spawner.js";
-
-// media assets
-import iconFiles from "./media/2d/icons/*.png";
-import soundFiles from "./media/sounds/*.mp3";
-
-// gif
-import explosionGifSrc from "./media/2d/gif/explosion.gif";
-
-// preload sounds
-let sounds = {};
-sounds.explosion = new Howl({ src: [soundFiles.explosion] });
-sounds.undo = new Howl({ src: [soundFiles.undo] });
-sounds.click = new Howl({ src: [soundFiles.click] });
-sounds.cluck = new Howl({ src: [soundFiles.cluck] });
-
-// convert icons to array
-const iconSRC = Object.keys(iconFiles).map(function (key) {
-  return iconFiles[key];
-});
-
-let icons = [];
-let deviceRotation = { x: 0, y: 0, z: 0 };
-
-// preload images
-iconSRC.map((src) => {
-  const img = new Image();
-  img.src = src;
-  icons.push(img);
-});
-
-// load random icon
-let iconIndex = Math.floor(Math.random() * icons.length);
-let icon = icons[iconIndex].src;
-
 // init three js
 let container;
 let camera, scene, renderer;
@@ -52,8 +15,20 @@ let isStarted = false;
 let floater = null;
 let bouncers = [];
 
-// set gravity
-const gravity = new THREE.Vector3(0, -0.01, 0);
+let userLocation = { lat: 0, lon: 0 };  // User's current GPS location
+
+// Array of plant objects loaded from CSV
+let plants = []; 
+fetch('../ABG.csv')  
+  .then(response => response.text())
+  .then(csvText => {
+    console.log(csvText); 
+    const plants = parseCSV(csvText);
+    console.log("Successfully read csv");
+  })
+  .catch(error => console.error('Error loading ABG.csv:', error));
+
+
 
 const init = () => {
   container = document.createElement("div");
@@ -71,15 +46,11 @@ const init = () => {
   light.position.set(0.5, 1, 1);
   scene.add(light);
 
-  //
-
   renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
   renderer.setPixelRatio(window.devicePixelRatio);
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.xr.enabled = true;
   container.appendChild(renderer.domElement);
-
-  //
 
   document.body.appendChild(
     ARButton.createButton(renderer, {
@@ -89,14 +60,28 @@ const init = () => {
     })
   );
 
-  //
-
   window.addEventListener("deviceorientation", handleOrientation, true);
 
-  //
+  // Get user's current location
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        userLocation = {
+          lat: position.coords.latitude,
+          lon: position.coords.longitude,
+        };
+        loadClosestPlants();
+      },
+      (error) => {
+        console.log("Error getting location: ", error);
+      }
+    );
+  } else {
+    console.log("Geolocation not supported");
+  }
 
+  // Load plant models and display closest 5
   const onSelect = () => {
-    // UI Acrobatics
     if (isUI) {
       isUI = false;
     } else {
@@ -138,26 +123,18 @@ const init = () => {
   scene.add(pointer);
   scene.add(reticle);
 
-  //
-
   window.addEventListener("resize", onWindowResize, false);
 
-  // start with random icon
-  document.querySelector(".icon").setAttribute("src", icon);
-
-  // splash screen
+  // Initial splash screen setup
   loadMesh(glbSrc.duck).then((mesh) => {
     scene.background = new THREE.Color(0x000000);
     floater = mesh.clone();
     floater.scale.copy(new THREE.Vector3(0.03, 0.03, 0.03));
     floater.rotation.set(0, 0, 0);
-    //Y↑ X→ Z↙
     floater.position.set(0, -0.7, -0.7);
     camera.lookAt(floater.position);
     scene.add(floater);
     camera.position.set(0, -0.38, 0);
-
-    //hide loader
     document.querySelector(".cool-stuff").classList.remove("hidden");
     document.querySelector(".loader").classList.add("hidden");
     document.querySelector("#ARButton").style.visibility = "visible";
@@ -167,109 +144,75 @@ const init = () => {
     console.log("models loaded!");
   });
 };
-// end of init
 
-function onWindowResize() {
-  camera.aspect = window.innerWidth / window.innerHeight;
-  camera.updateProjectionMatrix();
-  renderer.setSize(window.innerWidth, window.innerHeight);
+// Function to load the closest plants and render their models
+const loadClosestPlants = () => {
+  // Get 5 closest plants
+  const closestPlants = getClosestPlants(userLocation.lat, userLocation.lon, plants, 5);
+
+  closestPlants.forEach((plant) => {
+    loadMesh(`./plants_media/tree.glb`).then((mesh) => {
+      // Position the plant model at its GPS coordinates (converted to 3D world coordinates)
+      const position = latLonTo3D(plant.lat, plant.lon);
+      mesh.position.set(position.x, 0, position.z); // Assuming flat ground (y = 0)
+
+      // Add the plant model to the scene
+      scene.add(mesh);
+
+      // Add an event listener to display plant info when clicked
+      mesh.on('click', () => {
+        displayPlantInfo(plant);
+      });
+    });
+  });
+};
+
+// Function to calculate distance between two GPS points
+function getDistance(lat1, lon1, lat2, lon2) {
+  const R = 6371e3;
+  const φ1 = (lat1 * Math.PI) / 180;
+  const φ2 = (lat2 * Math.PI) / 180;
+  const Δφ = ((lat2 - lat1) * Math.PI) / 180;
+  const Δλ = ((lon2 - lon1) * Math.PI) / 180;
+
+  const a =
+    Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+    Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
 }
 
-const bomb = () => {
-  isUI = true;
-  sounds.explosion.play();
-  let explGif = new Image();
+// Function to find the closest plants to the user's location
+function getClosestPlants(lat, lon, plants, n) {
+  const plantsWithDistance = plants.map((plant) => {
+    const distance = getDistance(lat, lon, plant.lat, plant.lon);
+    return { plant, distance };
+  });
 
-  // cheap trick to start the gif loop from scratch
-  // i tried reloading the src
-  // doesn't work
-  explGif.src = explosionGifSrc + "?a=" + Math.random();
+  plantsWithDistance.sort((a, b) => a.distance - b.distance);
+  return plantsWithDistance.slice(0, n).map((item) => item.plant);
+}
 
-  let gif = document.createElement("img");
-  gif.setAttribute("src", explGif.src);
-  document.querySelector(".gifcontainer").appendChild(gif);
+// Function to convert lat/lon to 3D world coordinates (basic transformation)
+function latLonTo3D(lat, lon) {
+  const scale = 0.1;  // Scale factor for transforming GPS coordinates to 3D space
+  const x = (lon - userLocation.lon) * scale;
+  const z = (lat - userLocation.lat) * scale;
+  return { x, z };
+}
 
-  // it's rude to be late
-  window.setTimeout(() => {
-    bouncers.map((ball) => {
-      scene.remove(ball.mesh);
-    });
-    bouncers = [];
-    renderer.renderLists.dispose();
-    document.querySelector("nav").classList.add("hidden");
-    window.navigator.vibrate(1000);
-  }, 400);
-
-  // timing acrobatics
-  window.setTimeout(() => {
-    document.querySelector(".gifcontainer").innerHTML = "";
-  }, 1200);
-};
-
-const undo = () => {
-  if (bouncers.length > 0) {
-    window.setTimeout(() => {
-      window.navigator.vibrate(40);
-    }, 200);
-    let ball = bouncers[bouncers.length - 1];
-    scene.remove(ball.mesh);
-    bouncers.pop();
-    isUI = true;
-    sounds.undo.play();
-  }
-
-  // hide ui
-  if (bouncers.length === 0) {
-    document.querySelector("nav").classList.add("hidden");
-  }
-};
-
-const nextIcon = () => {
-  iconIndex++;
-  sounds.click.play();
-  updateIcon();
-};
-
-const prevIcon = () => {
-  iconIndex--;
-  sounds.cluck.play();
-  updateIcon();
-};
-
-const updateIcon = () => {
-  isUI = true;
-  const i = Math.abs(iconIndex % icons.length);
-  icon = icons[i].src;
-  document.querySelector(".icon").setAttribute("src", icon);
-  window.navigator.vibrate(40);
-};
-
-const toggleHints = () => {
-  const hints = document.querySelector(".hints");
-  const bottom = document.querySelector(".bottom");
-  const nav = document.querySelector("nav");
-
-  if (hints.classList.contains("hidden")) {
-    hints.classList.remove("hidden");
-    bottom.classList.add("hidden");
-    nav.classList.add("hidden");
-  } else {
-    if (bouncers.length > 0) nav.classList.remove("hidden");
-    hints.classList.add("hidden");
-    bottom.classList.remove("hidden");
-  }
-};
-
-const handleOrientation = (event) => {
-  var absolute = event.absolute;
-  var alpha = event.alpha;
-  var beta = event.beta;
-  var gamma = event.gamma;
-
-  deviceRotation.x = beta;
-  deviceRotation.y = gamma;
-  deviceRotation.z = alpha;
-};
+// Function to display the plant's information
+function displayPlantInfo(plant) {
+  const infoPanel = document.querySelector(".info-panel");
+  infoPanel.innerHTML = `
+    <h2>${plant.cname1}</h2>
+    <p>Genus: ${plant.genus}</p>
+    <p>Species: ${plant.species}</p>
+    <p>Location: (${plant.lat}, ${plant.lon})</p>
+  `;
+  infoPanel.classList.remove("hidden");
+}
 
 function animate() {
   renderer.setAnimationLoop(render);
@@ -345,32 +288,65 @@ function render(timestamp, frame) {
       }
     }
 
-    // update bouncers
-    for (let i = 0; i < bouncers.length; i++) {
-      bouncers[i].applyForce(gravity);
-      bouncers[i].update();
-    }
   }
 
   renderer.render(scene, camera);
 }
 
-//RUN! 🏃🏻‍♂️
 
+// Handle window resize event
+function onWindowResize() {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+}
+
+function handleOrientation(event) {
+  var absolute = event.absolute;
+  var alpha = event.alpha;
+  var beta = event.beta;
+  var gamma = event.gamma;
+
+  deviceRotation.x = beta;
+  deviceRotation.y = gamma;
+  deviceRotation.z = alpha;
+}
+
+function preload() {
+  // Preload models (implement your preload logic here)
+  return Promise.resolve();
+}
+
+function parseCSV(csvText) {
+  const rows = csvText.split("\n").slice(1); // Skip header row
+
+  return rows
+      .map(row => {
+          const columns = row.split(",");
+
+          while (columns.length < 9) columns.push(""); // Handle missing columns
+
+          return {
+              s_id: columns[0]?.trim(),
+              cname1: columns[1]?.trim() || "Unknown",
+              cname2: columns[2]?.trim() || "",
+              cname3: columns[3]?.trim() || "",
+              genus: columns[4]?.trim() || "Unknown",
+              species: columns[5]?.trim() || "",
+              cultivar: columns[6]?.trim() || "",
+              lon: parseFloat(columns[7]) || 0,
+              lat: parseFloat(columns[8]) || 0
+          };
+      })
+      .filter(plant => plant.s_id && plant.lat !== 0 && plant.lon !== 0);
+}
+
+
+// Run initialization
 init();
-
-renderer.xr.addEventListener("sessionstart", function (event) {
-  document.querySelector("#overlay").classList.remove("hidden");
-  scene.background = null;
-  isStarted = true;
-  document.querySelector("#splash").remove();
-  console.log("scene started");
-});
-
-document.querySelector(".undo").onclick = undo;
-document.querySelector(".bomb").onclick = bomb;
-document.querySelector(".next").onclick = nextIcon;
-document.querySelector(".prev").onclick = prevIcon;
-
-// gg
 animate();
+
+
+
+
+

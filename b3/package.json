@@ -1,0 +1,35 @@
+{
+  "name": "whale",
+  "author": "matlo <write@matlo.me>",
+  "license": "GPL-3.0",
+  "dependencies": {
+    "babel-core": "^6.26.3",
+    "babel-loader": "^8.2.2",
+    "babel-plugin-transform-runtime": "^6.23.0",
+    "babel-polyfill": "^6.26.0",
+    "babel-preset-es2015": "^6.24.1",
+    "babel-preset-stage-0": "^6.24.1",
+    "howler": "^2.2.1",
+    "parcel": "1.12.3",
+    "three": "^0.125.2"
+  },
+  "scripts": {
+    "start": "parcel src/index.pug",
+    "build": "parcel build src/index.pug --no-source-maps -d public",
+    "grok": "ngrok http 1234 --bind-tls=true",
+    "build_local": "pug src/index.pug --out public && stylus src/style.styl -o public && cp src/bounce.js public/ && cp -r src/media public/",
+    "start_local": "live-server public/"
+  },
+  "devDependencies": {
+    "babel-preset-env": "^1.7.0",
+    "live-server": "^1.2.2",
+    "parcel-plugin-static-files-copy": "^2.6.0",
+    "pug": "^3.0.0",
+    "pug-cli": "^1.0.0-alpha6",
+    "stylus": "^0.54.8"
+  },
+  "version": "1.0.0",
+  "description": "## [https://bouncing.band](https://bouncing.band)",
+  "main": "index.js",
+  "keywords": []
+}

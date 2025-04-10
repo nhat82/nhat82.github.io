@@ -11,8 +11,8 @@ window.onload = () => {
   const deviceRotation = { x: 0, y: 0, z: 0 };
 
   // Set up the camera offset
-  const offset = parseFloat(localStorage.getItem('calibrationOffset') || '0');
-  camera.rotation.y = offset * (Math.PI / 180); // Convert offset to radians
+  // const offset = parseFloat(localStorage.getItem('calibrationOffset') || '0');
+  // camera.rotation.y = offset * (Math.PI / 180); // Convert offset to radians
 
   // Force a layout resize after a short delay
   setTimeout(() => {
@@ -31,8 +31,8 @@ window.onload = () => {
   const selectedPlantInfo = document.getElementById('selected-plant-info');
   const debugInfo = document.getElementById('debug-info');
 
-  const calibrationOffset = parseFloat(localStorage.getItem('calibrationOffset') || '0');
-  debugInfo.textContent = `Offset loaded: ${calibrationOffset}°`;
+  // const calibrationOffset = parseFloat(localStorage.getItem('calibrationOffset') || '0');
+  // debugInfo.textContent = `Offset loaded: ${calibrationOffset}°`;
 
   // Throttle marker updates
   let lastMarkerUpdate = 0;

@@ -2,191 +2,261 @@ doctype html
 html(lang="en")
   head
     meta(charset="UTF-8")
-    title RaR Compass Calibration (Debug Mode)
+    title AR Plant Viewer
     meta(name="viewport", content="width=device-width, initial-scale=1.0")
-    link(href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap", rel="stylesheet")
+    // A-Frame & AR.js libraries
+    script(src="https://aframe.io/releases/1.3.0/aframe.min.js")
+    script(src="https://raw.githack.com/AR-js-org/AR.js/3.4.5/three.js/build/ar-threex-location-only.js")
+    script(src="https://raw.githack.com/AR-js-org/AR.js/3.4.5/aframe/build/aframe-ar.js")
     style.
-      body {
+      body, html {
         margin: 0;
-        font-family: 'Inter', sans-serif;
-        background-color: #000;
-        color: #fff;
-        text-align: center;
-        padding: 1.5rem;
+        padding: 0;
+        overflow: hidden;
+        height: 100%;
+        width: 100%;
       }
 
-      header {
-        margin-bottom: 2rem;
+      a-scene {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        z-index: 0;
       }
 
-      #compass-wrapper {
-        position: relative;
-        width: 300px;
-        height: 300px;
-        margin: 2rem auto;
-      }
-
-      #heading-value {
-        font-size: 1.3rem;
-        margin-top: 1rem;
+      #info-container {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 30%;
+        background: white;
+        z-index: 1000;
+        padding: 10px;
+        font-family: sans-serif;
+        overflow-y: auto;
       }
 
       button {
-        display: block;
-        width: 90%;
-        max-width: 300px;
-        margin: 1rem auto;
-        padding: 1rem;
-        font-size: 1rem;
-        border-radius: 8px;
-        border: 2px solid white;
-        background: transparent;
-        color: white;
-        font-weight: bold;
-        cursor: pointer;
-        transition: all 0.2s ease;
-      }
-
-      button:hover {
-        background: white;
-        color: black;
-      }
-
-      footer {
-        margin-top: 2rem;
-        font-size: 0.9rem;
-        color: #aaa;
-      }
-
-      #debug-info {
-        background: rgba(255, 255, 255, 0.8);
-        color: #000;
-        font-size: 0.9rem;
-        padding: 1rem;
-        text-align: left;
-        max-height: 150px;
-        overflow-y: auto;
-        margin-top: 1rem;
+        margin-top: 10px;
       }
 
   body
-    header
-      .title
-        span(style="color: #f23c3c; font-size: 1.5rem; font-weight:700;") Roots
-        span(style="color: #fff; font-size: 1.5rem; font-weight:700;") and
-        span(style="color: #f5cc3b; font-size: 1.5rem; font-weight:700;") Routes
+    a-scene(vr-mode-ui="enabled: false" arjs="sourceType: webcam; debugUIEnabled: false" renderer="antialias: true; alpha: true")
+      a-entity(cursor="rayOrigin: mouse")
+      a-camera(gps-new-camera)
+      
+    #info-container
+      p Plants V2 - Three.js 🌺
+      p#user-location Fetching location...
+      p#heading Heading: ...
+      p#selected-plant-info Tap a blue plant marker to see details here
+      p#debug-info Debug Info Below
+      ol#plant-list Closest plants
 
-    h2 🧭 Calibrate Your Heading
-    p Face true North, then tap "Calibrate" to begin the AR experience.
+    // Include the script as a module
+    script(type="module").
+      import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.137.5/build/three.module.js";
 
-    p#heading-value Heading: ...
-
-    button#start-btn Start Compass
-    button#calibrate-btn Calibrate & Enter AR
-
-    div#debug-info Debug Info:
-
-    footer
-      Plants Team © 2024
-
-    script(src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js")
-    script.
-      // Debug logging function
-      function logDebug(message) {
-        const debugInfo = document.getElementById("debug-info");
-        debugInfo.innerHTML += `<br>${message}`;
-      }
-
-      document.addEventListener("DOMContentLoaded", () => {
-        logDebug("DOM fully loaded.");
-
-        // Detect if user is on iOS
-        const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
-        logDebug("isIOS: " + isIOS);
-
-        // If not iOS, redirect to ar.html immediately
-        if (!isIOS) {
-          logDebug("Non-iOS detected. Redirecting to ar.html.");
-          window.location.href = "ar.html";
-          return;
-        }
-
-        // Initialize Three.js Scene
+      window.onload = () => {
+        // Scene setup
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         const renderer = new THREE.WebGLRenderer();
         renderer.setSize(window.innerWidth, window.innerHeight);
         document.body.appendChild(renderer.domElement);
 
-        let currentHeading = 0;
-        let calibrationOffset = 0;
+        // Device rotation initialization
+        const deviceRotation = { x: 0, y: 0, z: 0 };
 
-        // Add a simple cube to the scene as a reference (could represent something in AR)
-        const geometry = new THREE.BoxGeometry(1, 1, 1);
-        const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-        const cube = new THREE.Mesh(geometry, material);
-        scene.add(cube);
-        camera.position.z = 5;
+        // Force a layout resize after a short delay
+        setTimeout(() => {
+          window.dispatchEvent(new Event('resize'));
+          console.log('🔁 Forced layout resize');
+        }, 500);
 
-        // Handle device orientation events
-        function handleOrientation(event) {
-          const heading = event.webkitCompassHeading || (360 - event.alpha);
-          logDebug("Orientation event received. Heading: " + heading);
+        // Create user marker and plant markers objects
+        let userMarker = null;
+        let plantMarkers = {};
 
-          if (heading !== undefined && !isNaN(heading)) {
-            currentHeading = heading;
+        // Elements for UI info
+        const userLocation = document.getElementById('user-location');
+        const headingDisplay = document.getElementById('heading');
+        const plantList = document.getElementById('plant-list');
+        const selectedPlantInfo = document.getElementById('selected-plant-info');
+        const debugInfo = document.getElementById('debug-info');
 
-            // Update heading display
-            const headingDisplay = document.getElementById("heading-value");
-            headingDisplay.textContent = `Heading: ${Math.round(heading)}°`;
+        // Throttle marker updates
+        let lastMarkerUpdate = 0;
+        const updateInterval = 3000; // Update markers every 3 seconds
 
-            // Adjust the camera's rotation (calibrated with the offset)
-            camera.rotation.y = -(heading + calibrationOffset) * (Math.PI / 180);
-          }
+        // Track heading continuously
+        let heading = 0;
+        setInterval(() => {
+          headingDisplay.textContent = `Heading: ${Math.round(heading)}°`;
+        }, 1000);
+
+        // Use watchPosition to continuously track the user's location
+        if (navigator.geolocation) {
+          navigator.geolocation.watchPosition(
+            (position) => {
+              const userLat = position.coords.latitude;
+              const userLon = position.coords.longitude;
+              userLocation.textContent = `Lat: ${userLat}, Lon: ${userLon}`;
+
+              // Update or create the red user marker
+              if (!userMarker) {
+                userMarker = createMarker('./plants_media/hands.glb');
+                scene.add(userMarker);
+              }
+              updateMarkerPosition(userMarker, userLat, userLon);
+
+              // Throttle the update of plant markers
+              const now = Date.now();
+              if (now - lastMarkerUpdate > updateInterval) {
+                lastMarkerUpdate = now;
+                updatePlantMarkers(userLat, userLon);
+              }
+            },
+            (err) => {
+              console.error('Error getting location:', err);
+            },
+            {
+              enableHighAccuracy: true,
+              timeout: 5000,
+              maximumAge: 0
+            }
+          );
+        } else {
+          console.error('Geolocation is not supported by this browser.');
         }
 
-        // Start compass functionality
-        function startCompass() {
-          logDebug("startCompass triggered.");
-          if (typeof DeviceOrientationEvent.requestPermission === "function") {
-            DeviceOrientationEvent.requestPermission()
-              .then(permission => {
-                logDebug("Compass permission: " + permission);
-                if (permission === "granted") {
-                  window.addEventListener("deviceorientation", handleOrientation, true);
-                  logDebug("Added deviceorientation event listener.");
-                } else {
-                  alert("Compass access denied.");
-                }
-              })
-              .catch(err => {
-                alert("Compass not supported.");
-                logDebug("Error: " + err);
+        // Update plant markers with the data from the CSV
+        function updatePlantMarkers(userLat, userLon) {
+          fetch('./ABG.csv')
+            .then((response) => response.text())
+            .then((csvText) => {
+              // Parse CSV and compute distances
+              const plants = parseCSV(csvText)
+                .map((p) => ({
+                  ...p,
+                  distance: getDistance(userLat, userLon, p.lat, p.lon),
+                }))
+                .filter((p) => p.distance <= 10) // Only show plants within 10 meters
+                .sort((a, b) => a.distance - b.distance)
+                .slice(0, 10);
+
+              // Update the plant list (debug info)
+              plantList.innerHTML = '';
+              plants.forEach((plant) => {
+                const listItem = document.createElement('li');
+                listItem.innerText = `Height ${plant.height}, ${plant.cname1 || 'N/A'} - Genus: ${plant.genus}, Species: ${plant.species} (${plant.distance.toFixed(1)}m)`;
+                plantList.appendChild(listItem);
               });
-          } else {
-            // Fallback for non-iOS devices (shouldn't happen on iOS)
-            window.addEventListener("deviceorientation", handleOrientation, true);
-            logDebug("Added fallback orientation event listeners.");
-          }
+
+              // Create or update markers for each plant
+              plants.forEach((plant) => {
+                const marker = plantMarkers[plant.s_id] || createMarker('./plants_media/tree.glb');
+                updateMarkerPosition(marker, plant.lat, plant.lon);
+                if (!plantMarkers[plant.s_id]) {
+                  plantMarkers[plant.s_id] = marker;
+                  scene.add(marker);
+                  marker.addEventListener('click', () => {
+                    selectedPlantInfo.innerHTML = `
+                      🌱 <strong>${plant.cname1 || 'Unknown'}</strong><br>
+                      Genus: ${plant.genus || 'N/A'}<br>
+                      Species: ${plant.species || 'N/A'}<br>
+                      Distance: ${plant.distance.toFixed(1)} meters<br>
+                      Height: ${plant.height || 'N/A'}
+                    `;
+                  });
+                }
+              });
+
+              // Remove markers that are no longer in the dataset
+              for (const id in plantMarkers) {
+                if (!plants.find((plant) => plant.s_id === id)) {
+                  scene.remove(plantMarkers[id]);
+                  delete plantMarkers[id];
+                }
+              }
+            })
+            .catch((err) => console.error('CSV load error:', err));
         }
 
-        // Calibrate function
-        document.getElementById("calibrate-btn").addEventListener("click", () => {
-          calibrationOffset = (360 - currentHeading + 360) % 360;
-          logDebug("Calibration offset calculated: " + calibrationOffset);
-          localStorage.setItem("calibrationOffset", calibrationOffset);
-          logDebug("Stored calibration offset. Redirecting to AR.");
-          window.location.href = "ar.html";  // Redirect to the AR experience
-        });
+        // Helper to create a marker with a GLTF model
+        function createMarker(modelUrl) {
+          const marker = new THREE.Object3D();
+          const loader = new THREE.GLTFLoader();
+          loader.load(modelUrl, (gltf) => {
+            const model = gltf.scene;
+            marker.add(model);
+          });
+          return marker;
+        }
 
-        // Start the compass when the user clicks "Start Compass"
-        document.getElementById("start-btn").addEventListener("click", startCompass);
+        // Helper to update marker position
+        function updateMarkerPosition(marker, lat, lon) {
+          // Convert lat/lon to 3D coordinates (simplified example, use a more precise conversion)
+          const x = lon; // You might want to scale this based on the user's area
+          const z = lat; // Same as above
+          marker.position.set(x, 0, z);
+        }
 
-        // Animation loop to render the scene
+        // --- Helpers ---
+        function parseCSV(csvText) {
+          const rows = csvText.split('\n').slice(1);
+          return rows
+            .map((row) => {
+              const columns = row.split(',');
+              while (columns.length < 10) columns.push('');
+              return {
+                s_id: columns[0]?.trim(),
+                cname1: columns[1]?.trim() || 'Unknown',
+                cname2: columns[2]?.trim() || '',
+                cname3: columns[3]?.trim() || '',
+                genus: columns[4]?.trim() || 'Unknown',
+                species: columns[5]?.trim() || '',
+                cultivar: columns[6]?.trim() || '',
+                lon: parseFloat(columns[7]) || 0,
+                lat: parseFloat(columns[8]) || 0,
+                height: parseFloat(columns[9]) || 1,
+              };
+            })
+            .filter((p) => p.s_id && p.lat !== 0 && p.lon !== 0);
+        }
+
+        function getDistance(lat1, lon1, lat2, lon2) {
+          const R = 6371e3; // Earth's radius in meters
+          const φ1 = (lat1 * Math.PI) / 180;
+          const φ2 = (lat2 * Math.PI) / 180;
+          const Δφ = ((lat2 - lat1) * Math.PI) / 180;
+          const Δλ = ((lon2 - lon1) * Math.PI) / 180;
+          const a =
+            Math.sin(Δφ / 2) ** 2 +
+            Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) ** 2;
+          return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
+        }
+
+        // Handle device orientation
+        window.addEventListener("deviceorientation", handleOrientation, true);
+        function handleOrientation(event) {
+          deviceRotation.x = event.beta; // Pitch
+          deviceRotation.y = event.gamma; // Yaw
+          deviceRotation.z = event.alpha; // Roll
+
+          // Apply the device rotation to the camera
+          camera.rotation.x = deviceRotation.x * (Math.PI / 180); // Convert to radians
+          camera.rotation.y = deviceRotation.y * (Math.PI / 180);
+          camera.rotation.z = deviceRotation.z * (Math.PI / 180);
+        }
+
+        // Render the scene
         function animate() {
           requestAnimationFrame(animate);
           renderer.render(scene, camera);
         }
         animate();
-      });
-    </script>
+      }

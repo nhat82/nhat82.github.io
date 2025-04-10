@@ -31,8 +31,21 @@ window.addEventListener("load", () => {
     // Update or create the red user marker.
     if (!userMarker) {
       userMarker = document.createElement("a-sphere");
-      userMarker.setAttribute("scale", "1 1 1");
+      userMarker.setAttribute("scale", "0.2 0.2 0.2");
       userMarker.setAttribute("material", "color: red");
+      userMarker.setAttribute("class", "clickable");
+
+      userMarker.addEventListener("click", () => {
+              plantInfoDisplay.style.display = "block";
+              plantInfoDisplay.innerHTML = `
+                <div style="font-size: 2em; font-weight: bold;">
+                Current User
+                </div>
+              `;
+              setTimeout(() => {
+                plantInfoDisplay.style.display = "none";
+              }, 3000);
+            });
       scene.appendChild(userMarker);
     }
     userMarker.setAttribute(

@@ -16,6 +16,31 @@ window.addEventListener("load", () => {
 
   let userMarker = null;
   let plantMarkers = {};
+
+  async function getGroundY() {
+    return new Promise((resolve) => {
+      const raycaster = new THREE.Raycaster();
+      const down = new THREE.Vector3(0, -1, 0);
+      const cameraObj = document.querySelector("[gps-new-camera]").object3D;
+      raycaster.set(cameraObj.position, down);
+  
+      // Wait until scene is fully loaded
+      setTimeout(() => {
+        const intersects = raycaster.intersectObjects(
+          document.querySelector("a-scene").object3D.children,
+          true
+        );
+        const groundHit = intersects.find((i) => i.object.name === "ground");
+        if (groundHit) {
+          resolve(groundHit.point.y);
+        } else {
+          resolve(cameraObj.position.y - 1.6); // fallback if no hit
+        }
+      }, 100); // wait a bit for objects to load
+    });
+  }
+  
+
   let lastMarkerUpdate = 0;
   let lastLat = null, lastLon = null;
   const updateInterval = 10000;
@@ -69,65 +94,71 @@ window.addEventListener("load", () => {
     }
   });
 
-  function updatePlantMarkers(userLat, userLon) {
-    fetch("./ABG.csv")
-      .then((response) => response.text())
-      .then((csvText) => {
-        const plants = parseCSV(csvText)
-          .map((p) => ({
-            ...p,
-            distance: getDistance(userLat, userLon, p.lat, p.lon),
-          }))
-          .filter((p) => p.distance <= 10)
-          .sort((a, b) => a.distance - b.distance)
-          .slice(0, 10);
-
-        plants.forEach((plant) => {
-          const heightScale = getAdjustedHeight(plant.height);
-          const yPos = heightScale / 2;
-
-          if (plantMarkers[plant.s_id]) {
-            plantMarkers[plant.s_id].setAttribute(
-              "gps-new-entity-place",
-              `latitude: ${plant.lat}; longitude: ${plant.lon}`
-            );
-          } else {
-            const marker = document.createElement("a-entity");
-            marker.setAttribute("gltf-model", getPolyModelURL(plant.height));
-            marker.setAttribute("scale", "2 2 2");
-            marker.setAttribute("position", `0 ${yPos} 0`);
-            // Remove this line if you're seeing jitter due to "look-at"
-            // marker.setAttribute("look-at", "[gps-new-camera]");
-            marker.setAttribute("gps-new-entity-place", `latitude: ${plant.lat}; longitude: ${plant.lon}`);
-            marker.setAttribute("class", "clickable");
-
-            marker.addEventListener("click", () => {
-              plantInfoDisplay.style.display = "block";
-              plantInfoDisplay.innerHTML = `
-                <div style="font-size: 2em; font-weight: bold;">
-                  Common Name: ${plant.cname2 ? plant.cname2 + ", " : ""}${plant.cname1 || "Unknown"}
-                </div>
-                <div style="font-size: 1em;">
-                  Genus: ${plant.genus || "N/A"} &nbsp;&nbsp; Species: ${plant.species || "N/A"}
-                </div>
-              `;
-            });
-
-            scene.appendChild(marker);
-            plantMarkers[plant.s_id] = marker;
-          }
-        });
-
-        // Remove outdated markers
-        for (const id in plantMarkers) {
-          if (!plants.find((plant) => plant.s_id === id)) {
-            scene.removeChild(plantMarkers[id]);
-            delete plantMarkers[id];
-          }
+  async function updatePlantMarkers(userLat, userLon) {
+    try {
+      const response = await fetch("./ABG.csv");
+      const csvText = await response.text();
+  
+      const plants = parseCSV(csvText)
+        .map((p) => ({
+          ...p,
+          distance: getDistance(userLat, userLon, p.lat, p.lon),
+        }))
+        .filter((p) => p.distance <= 10)
+        .sort((a, b) => a.distance - b.distance)
+        .slice(0, 10);
+  
+      for (const plant of plants) {
+        const heightScale = getAdjustedHeight(plant.height);
+        const groundY = await getGroundY();
+        const yPos = groundY + heightScale / 2;
+  
+        if (plantMarkers[plant.s_id]) {
+          plantMarkers[plant.s_id].setAttribute(
+            "gps-new-entity-place",
+            `latitude: ${plant.lat}; longitude: ${plant.lon}`
+          );
+        } else {
+          const marker = document.createElement("a-entity");
+          marker.setAttribute("gltf-model", getPolyModelURL(plant.height));
+          marker.setAttribute("scale", "2 2 2");
+          marker.setAttribute("position", `0 ${yPos} 0`);
+          // marker.setAttribute("look-at", "[gps-new-camera]"); // optional
+          marker.setAttribute(
+            "gps-new-entity-place",
+            `latitude: ${plant.lat}; longitude: ${plant.lon}`
+          );
+          marker.setAttribute("class", "clickable");
+  
+          marker.addEventListener("click", () => {
+            plantInfoDisplay.style.display = "block";
+            plantInfoDisplay.innerHTML = `
+              <div style="font-size: 2em; font-weight: bold;">
+                Common Name: ${plant.cname2 ? plant.cname2 + ", " : ""}${plant.cname1 || "Unknown"}
+              </div>
+              <div style="font-size: 1em;">
+                Genus: ${plant.genus || "N/A"} &nbsp;&nbsp; Species: ${plant.species || "N/A"}
+              </div>
+            `;
+          });
+  
+          scene.appendChild(marker);
+          plantMarkers[plant.s_id] = marker;
         }
-      })
-      .catch((err) => console.error("CSV load error:", err));
+      }
+  
+      // Remove outdated markers
+      for (const id in plantMarkers) {
+        if (!plants.find((plant) => plant.s_id === id)) {
+          scene.removeChild(plantMarkers[id]);
+          delete plantMarkers[id];
+        }
+      }
+    } catch (err) {
+      console.error("CSV load error:", err);
+    }
   }
+  
 
   // Same helper functions as before
   function parseCSV(csvText) {

@@ -214,4 +214,29 @@ window.addEventListener("load", () => {
     else if (h >= 3 && h <= 4.5) return "./models/Tree.glb";
     else return "./models/BigTree.glb";
   }
+
+  // Allow multiple placed markers on ground click
+  const ground = document.querySelector('a-plane');
+  ground.addEventListener('click', (e) => {
+    const intersection = e.detail?.intersection;
+    if (!intersection) return;
+
+    const point = intersection.point;
+
+    const newMarker = document.createElement('a-box');
+    newMarker.setAttribute('color', '#FFD700');
+    newMarker.setAttribute('depth', '0.2');
+    newMarker.setAttribute('height', '0.2');
+    newMarker.setAttribute('width', '0.2');
+    newMarker.setAttribute('position', `${point.x} ${point.y + 0.2} ${point.z}`);
+
+    newMarker.addEventListener('click', () => {
+      plantInfoDisplay.style.display = "block";
+      plantInfoDisplay.innerHTML = `<div style="font-size: 1.2em;">Custom Marker</div>`;
+    });
+    
+    scene.appendChild(newMarker);
+  });
+
+
 });

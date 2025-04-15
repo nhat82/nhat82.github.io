@@ -104,7 +104,7 @@ window.addEventListener("load", () => {
           ...p,
           distance: getDistance(userLat, userLon, p.lat, p.lon),
         }))
-        .filter((p) => p.distance <= 10)
+        .filter((p) => p.distance <= 3)
         .sort((a, b) => a.distance - b.distance)
         .slice(0, 10);
   
@@ -119,9 +119,11 @@ window.addEventListener("load", () => {
             `latitude: ${plant.lat}; longitude: ${plant.lon}`
           );
         } else {
-          const marker = document.createElement("a-entity");
-          marker.setAttribute("gltf-model", getPolyModelURL(plant.height));
-          marker.setAttribute("scale", "2 2 2");
+          const marker = document.createElement("a-sphere");
+          // marker.setAttribute("gltf-model", getPolyModelURL(plant.height));
+          userMarker.setAttribute("scale", "0.2 0.2 0.2");
+          userMarker.setAttribute("material", "color: blue");
+          // marker.setAttribute("scale", "2 2 2");
           marker.setAttribute("position", `0 ${yPos} 0`);
           // marker.setAttribute("look-at", "[gps-new-camera]"); // optional
           marker.setAttribute(
@@ -216,27 +218,27 @@ window.addEventListener("load", () => {
   }
 
   // Allow multiple placed markers on ground click
-  const ground = document.querySelector('a-plane');
-  ground.addEventListener('click', (e) => {
-    const intersection = e.detail?.intersection;
-    if (!intersection) return;
+  // const ground = document.querySelector('a-plane');
+  // ground.addEventListener('click', (e) => {
+  //   const intersection = e.detail?.intersection;
+  //   if (!intersection) return;
 
-    const point = intersection.point;
+  //   const point = intersection.point;
 
-    const newMarker = document.createElement('a-box');
-    newMarker.setAttribute('color', '#FFD700');
-    newMarker.setAttribute('depth', '0.2');
-    newMarker.setAttribute('height', '0.2');
-    newMarker.setAttribute('width', '0.2');
-    newMarker.setAttribute('position', `${point.x} ${point.y + 0.2} ${point.z}`);
+  //   const newMarker = document.createElement('a-box');
+  //   newMarker.setAttribute('color', '#FFD700');
+  //   newMarker.setAttribute('depth', '0.2');
+  //   newMarker.setAttribute('height', '0.2');
+  //   newMarker.setAttribute('width', '0.2');
+  //   newMarker.setAttribute('position', `${point.x} ${point.y + 0.2} ${point.z}`);
 
-    newMarker.addEventListener('click', () => {
-      plantInfoDisplay.style.display = "block";
-      plantInfoDisplay.innerHTML = `<div style="font-size: 1.2em;">Custom Marker</div>`;
-    });
+  //   newMarker.addEventListener('click', () => {
+  //     plantInfoDisplay.style.display = "block";
+  //     plantInfoDisplay.innerHTML = `<div style="font-size: 1.2em;">Custom Marker</div>`;
+  //   });
     
-    scene.appendChild(newMarker);
-  });
+  //   scene.appendChild(newMarker);
+  // });
 
 
 });

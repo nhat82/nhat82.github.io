@@ -104,7 +104,11 @@ window.addEventListener("load", () => {
           ...p,
           distance: getDistance(userLat, userLon, p.lat, p.lon),
         }))
-        .filter((p) => p.distance <= 3)
+        .filter((p) => {
+          if (p.distance > 3) return false;
+          const bearingToPlant = getBearing(userLat, userLon, p.lat, p.lon);
+          return angleDiff(smoothedHeading, bearingToPlant) <= 45; // ±45° cone
+        })
         .sort((a, b) => a.distance - b.distance)
         .slice(0, 10);
   
@@ -119,11 +123,19 @@ window.addEventListener("load", () => {
             `latitude: ${plant.lat}; longitude: ${plant.lon}`
           );
         } else {
-          const marker = document.createElement("a-sphere");
-          // marker.setAttribute("gltf-model", getPolyModelURL(plant.height));
-          userMarker.setAttribute("scale", "0.2 0.2 0.2");
+          let marker; 
+          const yPos = 0.5; 
+          // if height is small, dot, else a tall box
+          if (plant.height < 2){
+            marker = document.createElement("a-sphere");
+            marker.setAttribute("scale", "0.2 0.2 0.2");
+          }
+          else{
+            marker = document.createElement("a-box");
+            marker.setAttribute("scale", "0.2 1 0.2");
+          }
+          
           userMarker.setAttribute("material", "color: blue");
-          // marker.setAttribute("scale", "2 2 2");
           marker.setAttribute("position", `0 ${yPos} 0`);
           // marker.setAttribute("look-at", "[gps-new-camera]"); // optional
           marker.setAttribute(
@@ -217,28 +229,24 @@ window.addEventListener("load", () => {
     else return "./models/BigTree.glb";
   }
 
-  // Allow multiple placed markers on ground click
-  // const ground = document.querySelector('a-plane');
-  // ground.addEventListener('click', (e) => {
-  //   const intersection = e.detail?.intersection;
-  //   if (!intersection) return;
-
-  //   const point = intersection.point;
-
-  //   const newMarker = document.createElement('a-box');
-  //   newMarker.setAttribute('color', '#FFD700');
-  //   newMarker.setAttribute('depth', '0.2');
-  //   newMarker.setAttribute('height', '0.2');
-  //   newMarker.setAttribute('width', '0.2');
-  //   newMarker.setAttribute('position', `${point.x} ${point.y + 0.2} ${point.z}`);
-
-  //   newMarker.addEventListener('click', () => {
-  //     plantInfoDisplay.style.display = "block";
-  //     plantInfoDisplay.innerHTML = `<div style="font-size: 1.2em;">Custom Marker</div>`;
-  //   });
-    
-  //   scene.appendChild(newMarker);
-  // });
-
+  function getBearing(lat1, lon1, lat2, lon2) {
+    const φ1 = lat1 * Math.PI / 180;
+    const φ2 = lat2 * Math.PI / 180;
+    const Δλ = (lon2 - lon1) * Math.PI / 180;
+  
+    const y = Math.sin(Δλ) * Math.cos(φ2);
+    const x = Math.cos(φ1) * Math.sin(φ2) -
+              Math.sin(φ1) * Math.cos(φ2) * Math.cos(Δλ);
+    const θ = Math.atan2(y, x);
+    return (θ * 180 / Math.PI + 360) % 360; // in degrees
+  }
+  
+  function angleDiff(a, b) {
+    let diff = a - b;
+    while (diff > 180) diff -= 360;
+    while (diff < -180) diff += 360;
+    return Math.abs(diff);
+  }
+  
 
 });

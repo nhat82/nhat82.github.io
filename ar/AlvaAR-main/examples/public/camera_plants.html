@@ -103,7 +103,7 @@
   }
 
   async function loadNearbyPlants(userLat, userLon) {
-    const res = await fetch("./ABG.csv");
+    const res = await fetch('./assets/ABG.csv');
     const csvText = await res.text();
     const plants = parseCSV(csvText)
       .map(p => ({ ...p, distance: getDistance(userLat, userLon, p.lat, p.lon) }))

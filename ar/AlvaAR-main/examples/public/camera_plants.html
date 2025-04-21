@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AR Plant Viewer</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      height: 100%;
+      width: 100%;
+      background: black;
+    }
+    #container {
+      position: relative;
+      width: 100%;
+      height: 100%;
+    }
+    canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+    .marker {
+      position: absolute;
+      width: 40px;
+      height: 40px;
+      background: green;
+      border-radius: 50%;
+      transform: translate(-20px, -20px);
+      z-index: 10;
+      cursor: pointer;
+    }
+    #plantInfoDisplay {
+      position: absolute;
+      bottom: 10px;
+      left: 10px;
+      background: rgba(255,255,255,0.9);
+      padding: 10px;
+      font-family: sans-serif;
+      font-size: 14px;
+      max-width: 90%;
+      border-radius: 8px;
+      display: none;
+      z-index: 20;
+    }
+  </style>
+</head>
+<body>
+<div id="container">
+  <div id="plantInfoDisplay"></div>
+</div>
+
+<script type="module">
+  import { AlvaAR } from './assets/alva_ar.js';
+  import { Camera, onFrame, resize2cover } from './assets/utils.js';
+
+  const container = document.getElementById('container');
+  const canvas = document.createElement('canvas');
+  container.appendChild(canvas);
+  const ctx = canvas.getContext('2d');
+  const infoBox = document.getElementById('plantInfoDisplay');
+
+  const videoConfig = {
+    video: { facingMode: 'environment', width: { ideal: 1280 } },
+    audio: false
+  };
+
+  let plantMarkers = [];
+  let currentPose = null;
+  let alva;
+
+  function getDistance(lat1, lon1, lat2, lon2) {
+    const R = 6371e3;
+    const φ1 = lat1 * Math.PI/180;
+    const φ2 = lat2 * Math.PI/180;
+    const Δφ = (lat2 - lat1) * Math.PI/180;
+    const Δλ = (lon2 - lon1) * Math.PI/180;
+    const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
+              Math.cos(φ1) * Math.cos(φ2) *
+              Math.sin(Δλ/2) * Math.sin(Δλ/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c;
+  }
+
+  function parseCSV(csvText) {
+    const rows = csvText.split("\n").slice(1);
+    return rows.map(row => {
+      const cols = row.split(",");
+      while (cols.length < 11) cols.push("");
+      return {
+        s_id: cols[0]?.trim(),
+        cname1: cols[1]?.trim() || "Unknown",
+        cname2: cols[2]?.trim() || "",
+        genus: cols[4]?.trim() || "Unknown",
+        species: cols[5]?.trim() || "",
+        lon: parseFloat(cols[7]) || 0,
+        lat: parseFloat(cols[8]) || 0
+      };
+    }).filter(p => p.lat && p.lon && p.s_id);
+  }
+
+  async function loadNearbyPlants(userLat, userLon) {
+    const res = await fetch("./ABG.csv");
+    const csvText = await res.text();
+    const plants = parseCSV(csvText)
+      .map(p => ({ ...p, distance: getDistance(userLat, userLon, p.lat, p.lon) }))
+      .filter(p => p.distance <= 10)
+      .sort((a, b) => a.distance - b.distance)
+      .slice(0, 10);
+
+    // Remove old markers
+    plantMarkers.forEach(m => container.removeChild(m.el));
+    plantMarkers = [];
+
+    // Add new markers
+    plants.forEach(p => {
+      const el = document.createElement("div");
+      el.className = "marker";
+      el.title = p.cname1;
+      el.addEventListener("click", () => {
+        infoBox.style.display = "block";
+        infoBox.innerHTML = `
+          <div style="font-size: 1em; font-weight: bold;">Common Name:</div>
+          <div style="font-size: 0.7em;">${p.cname2 ? p.cname2 + ", " : ""}${p.cname1 || ""}</div>
+          <div style="font-size: 0.5em;">Genus: ${p.genus || "N/A"} &nbsp;&nbsp; Species: ${p.species || "N/A"}</div>
+        `;
+      });
+      container.appendChild(el);
+      plantMarkers.push({ ...p, el });
+    });
+  }
+
+  async function updateNearbyPlants() {
+    navigator.geolocation.getCurrentPosition(
+      pos => loadNearbyPlants(pos.coords.latitude, pos.coords.longitude),
+      err => console.warn("Location error:", err.message)
+    );
+  }
+
+  async function main() {
+    const media = await Camera.Initialize(videoConfig);
+    const video = media.el;
+    const size = resize2cover(video.videoWidth, video.videoHeight, container.clientWidth, container.clientHeight);
+    canvas.width = container.clientWidth;
+    canvas.height = container.clientHeight;
+    video.style.width = size.width + 'px';
+    video.style.height = size.height + 'px';
+    video.style.position = 'absolute';
+    container.appendChild(video);
+
+    alva = await AlvaAR.Initialize(canvas.width, canvas.height);
+
+    // Initial plant load
+    updateNearbyPlants();
+
+    // 🔁 Refresh every 10 seconds
+    setInterval(updateNearbyPlants, 10000);
+
+    onFrame(() => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(video, 0, 0, video.videoWidth, video.videoHeight, size.x, size.y, size.width, size.height);
+      const frame = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const pose = alva.findCameraPose(frame);
+      currentPose = pose;
+
+      if (pose) {
+        for (const marker of plantMarkers) {
+          const slamPos = alva.convertGPSToLocal(pose, { lat: marker.lat, lon: marker.lon, alt: 0 });
+          const screen = alva.project(pose, slamPos);
+          if (screen?.visible) {
+            marker.el.style.left = screen.x + 'px';
+            marker.el.style.top = screen.y + 'px';
+            marker.el.style.display = 'block';
+          } else {
+            marker.el.style.display = 'none';
+          }
+        }
+      } else {
+        plantMarkers.forEach(m => m.el.style.display = 'none');
+      }
+
+      return true;
+    }, 30);
+  }
+
+  main().catch(err => alert('Error: ' + err));
+</script>
+</body>
+</html>

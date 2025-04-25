@@ -1,0 +1,13 @@
+import"./modulepreload-polyfill-B5Qt9EMX.js";import"./locar-aframe.es-BdBlv-aT.js";/* empty css              */import"./locar.es-C5PaAU8G.js";let u=!0;const p=document.querySelector("[locar-camera]"),h=document.querySelector("a-scene"),m=document.querySelector("#plantInfoDisplay");p.addEventListener("gpsupdate",n=>{n.detail.position.coords.latitude!=0&&n.detail.position.coords.longitude!=0&&u&&(alert(`Got the initial location: longitude ${n.detail.position.coords.longitude}, latitude ${n.detail.position.coords.latitude}`),f(n.detail.position.coords.latitude,n.detail.position.coords.longitude),u=!1)});document.querySelector("#setFakeLoc").addEventListener("click",n=>{const a=document.getElementById("fakeLat").value,e=document.getElementById("fakeLon").value;p.setAttribute("locar-camera",{simulateLatitude:parseFloat(a),simulateLongitude:parseFloat(e)})});function f(n,a){fetch("./ABG.csv").then(e=>e.text()).then(e=>{g(e).map(t=>({...t,distance:y(n,a,t.lat,t.lon)})).filter(t=>t.distance<=10).sort((t,i)=>t.distance-i.distance).slice(0,10).forEach(t=>{const i=document.createElement("a-box");i.setAttribute("locar-entity-place",{latitude:t.lat,longitude:t.lon}),i.setAttribute("material",{color:"blue"}),i.setAttribute("scale",{x:2,y:2,z:2}),i.addEventListener("click",()=>{m.style.display="block",m.innerHTML=`
+              <div style="font-size: 1em; font-weight: bold;">
+                Common Name:
+              </div>
+              <div style="font-size: 0.7em;">
+                ${t.cname2?t.cname2+", ":""}${t.cname1||""}
+              </div>
+              <div style="font-size: 0.5em;">
+                Genus: ${t.genus||"N/A"} &nbsp;&nbsp;
+                Species: ${t.species||"N/A"}
+              </div>
+            `}),h.appendChild(i)})}).catch(e=>console.error("CSV load error:",e))}function g(n){return n.split(`
+`).slice(1).map(e=>{var t,i,s,c,l,r,d;const o=e.split(",");for(;o.length<11;)o.push("");return{s_id:(t=o[0])==null?void 0:t.trim(),cname1:((i=o[1])==null?void 0:i.trim())||"Unknown",cname2:((s=o[2])==null?void 0:s.trim())||"",cname3:((c=o[3])==null?void 0:c.trim())||"",genus:((l=o[4])==null?void 0:l.trim())||"Unknown",species:((r=o[5])==null?void 0:r.trim())||"",cultivar:((d=o[6])==null?void 0:d.trim())||"",lon:parseFloat(o[7])||0,lat:parseFloat(o[8])||0,height:parseFloat(o[10])||1}}).filter(e=>e.s_id&&e.lat!==0&&e.lon!==0)}function y(n,a,e,o){const i=(e-n)*(Math.PI/180),s=(o-a)*(Math.PI/180),c=Math.sin(i/2)*Math.sin(i/2)+Math.cos(n*(Math.PI/180))*Math.cos(e*(Math.PI/180))*Math.sin(s/2)*Math.sin(s/2);return 6371*(2*Math.atan2(Math.sqrt(c),Math.sqrt(1-c)))*1e3}

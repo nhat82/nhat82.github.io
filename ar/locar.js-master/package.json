@@ -15,10 +15,11 @@
   },
   "scripts": {
     "build": "vite build && npm pack",
-    "makedocs": "jsdoc -r lib -d docs/api", 
+    "makedocs": "jsdoc -r lib -d docs/api",
     "deploy": "gh-pages -d dist"
   },
   "devDependencies": {
+    "gh-pages": "^6.3.0",
     "jsdoc": "^4.0.4",
     "vite": "^5.4.8"
   },

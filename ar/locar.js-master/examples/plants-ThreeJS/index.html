@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script type="module" src="src/main.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/style.css" />
+</head>
+<body>
+    <main>
+        <!-- Plant Info Display: Always visible -->
+        <div id="plant-info" style="position: fixed; top: 10px; left: 10px; background-color: rgba(0, 0, 0, 0.7); color: white; padding: 10px; z-index: 10;">
+            Plant info: Nothing for now
+        </div>
+    
+        <!-- GPS Input for fake location -->
+        <div id="gpsinput" style="position: fixed; top: 100px; left: 10px; background-color: rgba(0, 0, 0, 0.7); color: white; padding: 10px; z-index: 10;">
+            <div><input id="fakeLat" placeholder="Fake Lat" /></div>
+            <div><input id="fakeLon" placeholder="Fake Lon" /></div>
+            <div><button id="setFakeLoc">Set Fake Location!</button></div>
+        </div>
+    
+        <!-- Canvas for Three.js renderer -->
+        <canvas id="glscene" width="800" height="600"></canvas> <!-- Make sure it's a <canvas> tag -->
+    
+        <!-- AR Scene (use <a-scene> here for AR.js integration) -->
+        <a-scene id="ar-scene" locar-webcam>
+            <a-camera look-controls="magicWindowTrackingEnabled: false" wasd-controls locar-camera></a-camera>
+        </a-scene>
+    </main>
+</body>
+</html>

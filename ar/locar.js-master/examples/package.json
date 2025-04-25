@@ -1,0 +1,14 @@
+{
+  "dependencies": {
+    "aframe": "^1.7.1",
+    "locar": "0.0.11",
+    "locar-aframe": "0.0.2"
+  },
+  "devDependencies": {
+    "vite": "^5.4.8"
+  },
+  "scripts": {
+    "dev": "vite dev",
+    "build": "vite build --emptyOutDir"
+  }
+}

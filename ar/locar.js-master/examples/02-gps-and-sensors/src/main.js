@@ -3,9 +3,11 @@ import * as LocAR from 'locar';
 
 const camera = new THREE.PerspectiveCamera(80, window.innerWidth / window.innerHeight, 0.001, 1000);
 
-const renderer = new THREE.WebGLRenderer();
+const renderer = new THREE.WebGLRenderer({
+	canvas: document.getElementById('glscene')
+});
 renderer.setSize(window.innerWidth, window.innerHeight);
-document.body.appendChild(renderer.domElement);
+//document.body.appendChild(renderer.domElement);
 
 const scene = new THREE.Scene();
 
@@ -18,8 +20,8 @@ window.addEventListener("resize", e => {
 });
 
 const cam = new LocAR.Webcam( { 
-    width: 1024, 
-    height: 768,
+    idealWidth: 1024, 
+    idealHeight: 768,
     onVideoStarted: texture => {
         scene.background = texture;        
     }
@@ -88,3 +90,4 @@ function animate() {
     deviceOrientationControls?.update();
     renderer.render(scene, camera);
 }
+

@@ -90,9 +90,9 @@ window.addEventListener("load", () => {
             ...p,
             distance: getDistance(userLat, userLon, p.lat, p.lon),
           }))
-          .filter((p) => p.distance <= 10)
-          .sort((a, b) => a.distance - b.distance)
-          .slice(0, 10);
+          .filter((p) => p.distance <= 20)
+          .sort((a, b) => a.distance - b.distance);
+          // .slice(0, 10);
 
         plants.forEach((plant) => {
           const heightScale = getAdjustedHeight(plant.height);
@@ -106,7 +106,7 @@ window.addEventListener("load", () => {
           } else {
             const marker = document.createElement("a-entity");
             marker.setAttribute("gltf-model", getPolyModelURL(plant.height));
-            marker.setAttribute("scale", getScaleFromHeight(plant.height) / 2);
+            marker.setAttribute("scale", getScaleFromHeight(plant.height));
             marker.setAttribute("position", `0 ${yPos} 0`);
             marker.setAttribute("look-at", "[gps-new-camera]");
             marker.setAttribute(
@@ -131,9 +131,9 @@ window.addEventListener("load", () => {
                 </div>
               `;
               // hides the display
-              setTimeout(() => {
-                plantInfoDisplay.style.display = "none";
-              }, 3000);
+              // setTimeout(() => {
+              //   plantInfoDisplay.style.display = "none";
+              // }, 3000);
             });
 
             scene.appendChild(marker);

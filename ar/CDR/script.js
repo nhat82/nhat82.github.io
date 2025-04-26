@@ -106,7 +106,7 @@ window.addEventListener("load", () => {
           } else {
             const marker = document.createElement("a-entity");
             marker.setAttribute("gltf-model", getPolyModelURL(plant.height));
-            marker.setAttribute("scale", getScaleFromHeight(plant.height));
+            marker.setAttribute("scale", getScaleFromHeight(plant.height) / 2);
             marker.setAttribute("position", `0 ${yPos} 0`);
             marker.setAttribute("look-at", "[gps-new-camera]");
             marker.setAttribute(

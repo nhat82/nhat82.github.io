@@ -90,7 +90,7 @@ window.addEventListener("load", () => {
             ...p,
             distance: getDistance(userLat, userLon, p.lat, p.lon),
           }))
-          .filter((p) => p.distance <= 20)
+          .filter((p) => p.distance <= 10)
           .sort((a, b) => a.distance - b.distance);
           // .slice(0, 10);
 

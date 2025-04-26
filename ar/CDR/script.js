@@ -48,8 +48,8 @@ window.addEventListener("load", () => {
 
     // the users marker
     if (!userMarker) {
-      userMarker = document.createElement("a-box");
-      userMarker.setAttribute("scale", "1 1 1");
+      userMarker = document.createElement("a-sphere");
+      userMarker.setAttribute("scale", "0.2 0.2 0.2");
       userMarker.setAttribute("material", "color: red");
       scene.appendChild(userMarker);
     }
@@ -104,9 +104,12 @@ window.addEventListener("load", () => {
               `latitude: ${plant.lat}; longitude: ${plant.lon}`
             );
           } else {
-            const marker = document.createElement("a-entity");
-            marker.setAttribute("gltf-model", getPolyModelURL(plant.height));
-            marker.setAttribute("scale", getScaleFromHeight(plant.height));
+            const marker = document.createElement("a-sphere");
+            marker.setAttribute("radius", "0.2");
+            marker.setAttribute("color", "blue");
+            // const marker = document.createElement("a-entity");
+            // marker.setAttribute("gltf-model", getPolyModelURL(plant.height));
+            // marker.setAttribute("scale", getScaleFromHeight(plant.height));
             marker.setAttribute("position", `0 ${yPos} 0`);
             marker.setAttribute("look-at", "[gps-new-camera]");
             marker.setAttribute(

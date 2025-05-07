@@ -30,8 +30,8 @@ window.addEventListener("load", () => {
 
     // the users marker
     if (!userMarker) {
-      userMarker = document.createElement("a-box");
-      userMarker.setAttribute("scale", "1 1 1");
+      userMarker = document.createElement("a-sphere");
+      userMarker.setAttribute("radius", "0.2");
       userMarker.setAttribute("material", "color: red");
       scene.appendChild(userMarker);
     }

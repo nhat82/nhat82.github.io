@@ -24,32 +24,14 @@ window.addEventListener("load", () => {
 
   let firstUpdateDone = false;
 
-  let currentOrientation = { alpha: 0, beta: 0, gamma: 0 }; // Store current orientation
-  let smoothedOrientation = { alpha: 0, beta: 0, gamma: 0 }; // Smoothed orientation
-  const smoothingFactor = 0.1; // Smooth factor (0 = no smoothing, 1 = fully smooth)
-
-  // Listen for device orientation events (gyro/IMU)
-  window.addEventListener('deviceorientation', function(event) {
-    // Update the orientation data
-    currentOrientation.alpha = event.alpha || 0; // Z-axis
-    currentOrientation.beta = event.beta || 0;   // X-axis
-    currentOrientation.gamma = event.gamma || 0; // Y-axis
-
-    // Apply smoothing
-    smoothedOrientation.alpha = smoothedOrientation.alpha + smoothingFactor * (currentOrientation.alpha - smoothedOrientation.alpha);
-    smoothedOrientation.beta = smoothedOrientation.beta + smoothingFactor * (currentOrientation.beta - smoothedOrientation.beta);
-    smoothedOrientation.gamma = smoothedOrientation.gamma + smoothingFactor * (currentOrientation.gamma - smoothedOrientation.gamma);
-  });
-
-  // Listen for GPS updates and update the user and plant markers
   camera.addEventListener("gps-camera-update-position", (e) => {
     const userLat = e.detail.position.latitude;
     const userLon = e.detail.position.longitude;
 
     // the users marker
     if (!userMarker) {
-      userMarker = document.createElement("a-sphere");
-      userMarker.setAttribute("scale", "0.2 0.2 0.2");
+      userMarker = document.createElement("a-box");
+      userMarker.setAttribute("scale", "1 1 1");
       userMarker.setAttribute("material", "color: red");
       scene.appendChild(userMarker);
     }
@@ -60,25 +42,19 @@ window.addEventListener("load", () => {
 
     const now = Date.now();
 
-    // how often the code is updated
+    
+    // how often code is updated
     if (!firstUpdateDone) {
       firstUpdateDone = true; 
       lastMarkerUpdate = now; 
       updatePlantMarkers(userLat, userLon);
     } else {
+      
       if (now - lastMarkerUpdate > updateInterval) {
         lastMarkerUpdate = now;
         updatePlantMarkers(userLat, userLon);
       }
     }
-
-    // Apply smoothed IMU data to adjust camera orientation
-    const camera = document.querySelector('[gps-new-camera]');
-    camera.setAttribute('rotation', {
-      x: smoothedOrientation.beta, // tilt on X-axis (forward/back)
-      y: smoothedOrientation.gamma, // tilt on Y-axis (left/right)
-      z: smoothedOrientation.alpha, // rotation on Z-axis (turning)
-    });
   });
 
   function updatePlantMarkers(userLat, userLon) {
@@ -90,9 +66,9 @@ window.addEventListener("load", () => {
             ...p,
             distance: getDistance(userLat, userLon, p.lat, p.lon),
           }))
-          .filter((p) => p.distance <= 3)
-          .sort((a, b) => a.distance - b.distance);
-          // .slice(0, 10);
+          .filter((p) => p.distance <= 10)
+          .sort((a, b) => a.distance - b.distance)
+          .slice(0, 10);
 
         plants.forEach((plant) => {
           const heightScale = getAdjustedHeight(plant.height);
@@ -107,9 +83,6 @@ window.addEventListener("load", () => {
             const marker = document.createElement("a-sphere");
             marker.setAttribute("radius", "0.2");
             marker.setAttribute("color", "blue");
-            // const marker = document.createElement("a-entity");
-            // marker.setAttribute("gltf-model", getPolyModelURL(plant.height));
-            // marker.setAttribute("scale", getScaleFromHeight(plant.height));
             marker.setAttribute("position", `0 ${yPos} 0`);
             marker.setAttribute("look-at", "[gps-new-camera]");
             marker.setAttribute(
@@ -134,9 +107,9 @@ window.addEventListener("load", () => {
                 </div>
               `;
               // hides the display
-              // setTimeout(() => {
-              //   plantInfoDisplay.style.display = "none";
-              // }, 3000);
+              setTimeout(() => {
+                plantInfoDisplay.style.display = "none";
+              }, 3000);
             });
 
             scene.appendChild(marker);
@@ -216,17 +189,20 @@ window.addEventListener("load", () => {
     }
   }
 
-  function getScaleFromHeight(h) {
-    if (h <= 1) {
-      return "1 1 1"; 
-    } else if (h > 1 && h <= 1.5) {
-      return "1.5 1.5 1.5"; 
-    } else if (h > 1.5 && h < 3) {
-      return "2 2 2"; 
-    } else if (h >= 3 && h <= 4.5) {
-      return "2.2 2.2 2.2"; 
-    } else {
-      return "2.4 2.4 2.4"; 
-    }
+
+function getScaleFromHeight(h) {
+  if (h <= 1) {
+    return "1 1 1"; 
+  } else if (h > 1 && h <= 1.5) {
+    return "1.5 1.5 1.5"; 
+  } else if (h > 1.5 && h < 3) {
+    return "2 2 2"; 
+  } else if (h >= 3 && h <= 4.5) {
+    return "2.2 2.2 2.2"; 
+  } else {
+    return "2.4 2.4 2.4"; 
   }
+}
+
+
 });

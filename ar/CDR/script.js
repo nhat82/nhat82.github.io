@@ -70,6 +70,16 @@ window.addEventListener("load", () => {
           .sort((a, b) => a.distance - b.distance)
           .slice(0, 10);
 
+        // Update plant list UI
+        const plantListEl = document.getElementById("plant-list");
+        plantListEl.innerHTML = ""; // Clear old list
+
+        plants.forEach((plant) => {
+          const li = document.createElement("li");
+          li.textContent = `${plant.cname2 ? plant.cname2 + ", " : ""}${plant.cname1} (${plant.distance.toFixed(1)}m)`;
+          plantListEl.appendChild(li);
+        });
+
         plants.forEach((plant) => {
           const heightScale = getAdjustedHeight(plant.height);
           const yPos = heightScale / 2;

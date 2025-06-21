@@ -1,0 +1,56 @@
+---
+import "../styles/global.css";
+const {
+  title = "Trevor Moore: Personal Site",
+  description = "The personal site of Trevor Moore",
+  image = "sth.jpg",
+} = Astro.props;
+const { href, origin } = new URL(Astro.request.url);
+---
+
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<!-- Primary Meta Tags -->
+<title>{title}</title>
+<meta name="title" content={title} />
+<meta name="description" content={description} />
+
+<!-- Open Graph / Facebook -->
+<meta property="og:type" content="website" />
+<meta property="og:url" content={href} />
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+<meta property="og:image" content={`${origin}/meta-images/${image}`} />
+
+<!-- Twitter -->
+<meta property="twitter:card" content="summary_large_image" />
+<meta property="twitter:url" content={href} />
+<meta property="twitter:title" content={title} />
+<meta property="twitter:description" content={description} />
+<meta property="twitter:image" content={`${origin}/meta-images/${image}`} />
+
+<link
+  rel="icon"
+  href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'>
+  <style>
+    circle { fill: rgba(52, 55, 60, 1); }
+    .test { fill: white; }
+    @media (prefers-color-scheme: dark)  {
+      circle { fill: white; }
+      .test { fill: rgba(52, 55, 60, 1); }
+    }
+  </style>
+  <circle cx='12' cy='12' r='12' />
+  <circle class='test' cx='12' cy='18' r='3'>
+    <animate attributeName='r' values='3;0;3' dur='1s' repeatCount='indefinite' />
+  </circle>
+</svg>"
+/>
+<slot />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link
+  href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700"
+  rel="stylesheet"
+/>

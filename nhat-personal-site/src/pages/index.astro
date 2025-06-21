@@ -1,0 +1,91 @@
+---
+// Component Imports
+import HeadingSlider from "../components/HeadingSlider";
+
+import MainBody from "../components/MainBody.astro";
+import MainHead from "../components/MainHead.astro";
+import PostItem from "../components/PostItem.jsx";
+import SectionHeading from "../components/SectionHeading.astro";
+import { sortDate } from "../scripts/utils.js";
+
+const posts = await Astro.glob("./thoughts/*.md");
+const topPosts = posts.sort(sortDate).slice(0, 5);
+---
+
+<html lang="en">
+  <head>
+    <MainHead
+      title="Trevor Moore"
+      description="Trevor Moore is a Mechanical Engineer / Computer Science student based in College Park, MD."
+    />
+  </head>
+  <MainBody>
+    <section id="hero" class="py-24 intro-animation relative">
+      <h1 class="text-4xl mb-4 text-acid">Hello, my name is Trevor.</h1>
+      <h2 class="font-serif text-2xl">
+        I am a Mechanical Engineer / Computer Science student based in College Park, MD.
+      </h2>
+
+      <div class="align-center gap-2 lg:gap-8 hidden lg:flex mt-8">
+        <a
+          class="nav-link cursor-alias underline"
+          href="mailto:tmoore03@g.umd.edu"
+          target="_blank"
+          rel="noreferrer"
+        >
+          tmoore03@g.umd.edu
+        </a>
+        <a
+          class="nav-link cursor-alias underline"
+          href="https://www.linkedin.com/in/trevorjamesmoore/"
+          target="_blank"
+          rel="noreferrer"
+          href="/work"
+        >
+          LinkedIn
+        </a>
+                <a
+          class="nav-link cursor-alias underline"
+          href="../../public/pdfs/Nhat_Nguyen_Resume.pdf"
+          target="_blank"
+          rel="noreferrer"
+        >
+          Resume (right now it's mine)
+        </a>
+      </div>
+    </section>
+    <section class="fade-in pb-12">
+      <div class="lg:grid grid-cols-12 gap-12">
+        <div class="col-span-8">
+          <SectionHeading> About Me </SectionHeading>
+          <article class="aspect-video mb-8">
+            <div class="bg-faint aspect-video px-4">
+              <HeadingSlider client:load />
+            </div>
+            <p class="text-xs text-center font-serif mt-4 opacity-50">
+              Scroll the timeline
+            </p>
+          </article>
+        </div>
+        <div class="col-span-4">
+          <SectionHeading> Recent Thoughts </SectionHeading>
+          <ul>
+            {
+              topPosts.map(({ frontmatter, url }) => (
+                <PostItem
+                  isHomePage={true}
+                  title={frontmatter.title}
+                  published={frontmatter.published}
+                  url={url}
+                />
+              ))
+            }
+          </ul>
+          <a href="/thoughts" class="more-link mt-8"
+            >More <span class="arrow">→</span>
+          </a>
+        </div>
+      </div>
+    </section>
+  </MainBody>
+</html>

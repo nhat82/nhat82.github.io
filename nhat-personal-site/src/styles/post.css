@@ -1,0 +1,266 @@
+.post-content {
+  max-width: 80ch;
+  margin: auto;
+  min-height: 75vh;
+}
+
+.post-content h1 {
+  @apply text-4xl font-bold mt-10;
+}
+
+.post-content h2 {
+  @apply text-2xl font-serif font-bold mt-10;
+}
+
+.post-content h3 {
+  @apply text-xl font-serif font-bold mt-10;
+}
+
+.post-content p {
+  @apply text-xl font-serif leading-[1.75] opacity-90 mt-10;
+}
+
+.post-content strong {
+  @apply font-bold font-serif text-xl;
+}
+
+.post-content blockquote {
+  @apply relative my-10 pl-4;
+}
+
+.post-content blockquote:before {
+  content: "";
+  width: 3px;
+  height: 100%;
+  display: block;
+  position: absolute;
+  left: 0;
+  background-color: currentColor;
+}
+
+.post-content img {
+  @apply w-full h-auto my-8;
+}
+
+.post-content ol {
+  list-style: decimal;
+  @apply pl-6 my-8;
+}
+
+.post-content ul {
+  list-style: disc;
+  @apply pl-8 my-8;
+}
+.post-content ol ol {
+  list-style: lower-latin;
+  @apply my-4;
+}
+
+.post-content li {
+  @apply font-serif text-xl my-4;
+}
+
+.post-content a:not(.more-link, .toc-link) {
+  @apply underline opacity-80;
+}
+
+.post-content a:not(.toc-link):hover {
+  @apply opacity-100 text-accent;
+}
+
+.post-content iframe {
+  @apply my-10 aspect-video w-full h-auto;
+}
+
+.toc {
+  @apply fixed hidden lg:block px-8 right-0;
+  top: 50%;
+  max-width: 280px;
+  transform: translateY(calc(-50% + 40px));
+  z-index: 2;
+  padding: 1rem;
+}
+
+.toc::before {
+  content: "Table of Contents";
+  top: 0px;
+  padding-top: 1rem;
+  font-weight: 800;
+  transform: translateX(-24px);
+  @apply text-sm absolute invisible uppercase;
+}
+
+.toc:hover {
+  @apply bg-base border border-faint;
+}
+
+.toc:hover::before {
+  visibility: visible;
+  transform: translateX(0px);
+}
+
+.toc:hover ol {
+  visibility: visible;
+}
+
+.toc:hover > ol {
+  padding-top: 8px;
+}
+
+.toc ol {
+  @apply relative pl-0 invisible;
+}
+
+.toc ol ol {
+  @apply mt-2 mb-0;
+}
+
+.toc li {
+  @apply block text-sm font-serif not-italic font-bold pl-0 my-0;
+}
+.toc li + li {
+  @apply mt-2;
+}
+
+.toc li li {
+  @apply text-[13px];
+}
+
+.toc a {
+  @apply no-underline whitespace-nowrap text-contrast truncate w-full block;
+}
+
+.toc a.active {
+  @apply opacity-100 text-accent;
+}
+
+.toc a:hover {
+  @apply opacity-100;
+}
+
+.toc-item {
+  @apply relative my-0;
+}
+
+.toc::before,
+.toc-link {
+  transform: translateX(24px);
+  transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1),
+    color 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.toc-link {
+  font-weight: 600;
+}
+
+.toc-link-h3 {
+  @apply pl-2;
+}
+
+.toc:hover .toc-link {
+  transform: translateX(0);
+}
+
+.toc-link::after {
+  content: "";
+  display: block;
+  width: 28px;
+  height: 3px;
+  background-color: var(--acid);
+  border-bottom: 1px solid var(--stone);
+  position: absolute;
+  right: 0px;
+  top: 10px;
+  z-index: 2;
+  border-radius: 8px;
+  visibility: visible;
+  transform: translateX(0px);
+  transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1) backwards;
+  transform-origin: right;
+}
+
+.toc-link:not(.active) {
+  opacity: 0.8;
+}
+
+.toc-link:not(.active)::after {
+  opacity: 0.25;
+}
+
+.toc-link-h3::after {
+  width: 16px;
+}
+
+.toc:hover .toc-link::after {
+  visibility: hidden;
+  transform: translateX(-24px);
+}
+
+.post-content .twitter-tweet {
+  @apply mx-auto my-10 !important;
+}
+
+.astro-code {
+  padding: 2rem;
+  background-color: var(--base-shaded) !important;
+  border-bottom: 2px solid var(--contrast);
+}
+
+.code-wrapper {
+  position: relative;
+}
+
+.code-wrapper:has(.astro-code[data-language]):after {
+  font-family: var(--font-mono);
+  background-color: var(--acid);
+  border: 2px solid var(--stone);
+  color: var(--stone);
+  display: inline-block;
+  aspect-ratio: 1/1;
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  font-size: 10px;
+  text-transform: uppercase;
+  font-weight: bold;
+  height: 24px;
+  text-align: center;
+  vertical-align: middle;
+  line-height: 22px;
+  z-index: 1;
+  padding-left: 2px;
+  padding-right: 2px;
+}
+
+.code-wrapper:has(.astro-code[data-language="html"]):after {
+  content: "HTML";
+  aspect-ratio: 4/3;
+}
+
+.code-wrapper:has(.astro-code[data-language="css"]):after {
+  content: "CSS";
+  aspect-ratio: 4/3;
+}
+
+.code-wrapper:has(.astro-code[data-language="js"]):after {
+  content: "JS";
+}
+
+img + em {
+  display: block;
+  text-align: center;
+  font-size: 1rem;
+  opacity: 0.75;
+  margin-top: -1rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  .astro-code,
+  .astro-code span {
+    color: var(--shiki-dark) !important;
+    /* Optional, if you also want font styles */
+    font-style: var(--shiki-dark-font-style) !important;
+    font-weight: var(--shiki-dark-font-weight) !important;
+    text-decoration: var(--shiki-dark-text-decoration) !important;
+  }
+}

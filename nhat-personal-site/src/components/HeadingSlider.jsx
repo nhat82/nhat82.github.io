@@ -13,12 +13,32 @@ const history = [
     event: "Born.",
   },
   {
+    year: 2010,
+    event: "Trilingual (EN, DE, VN)",
+  },
+  {
+    year: 2018,
+    event: "English major in high school. Switch to tech with robotics club and research competitions",
+  },
+  {
+    year: 2019,
+    event: "Got into AI. Made a text-based depression flagging system. Won 1st place in Software Development Research!",
+  },
+  {
+    year: 2022,
+    event: "Got in UMD. Came to the US.",
+  },
+  {
+    year: 2023,
+    event: "1st swe internship",
+  },
+  {
     year: 2024,
-    event: "Met an annoying crack head nut. Can legally drink.",
+    event: "1st ai internship",
   },
   {
     year: 2025,
-    event: "TURNED 22 WWOOOOOOOOOOO",
+    event: "Graduating in Dec!",
   },
 ];
 

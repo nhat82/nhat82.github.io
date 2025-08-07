@@ -3,15 +3,15 @@
 @tailwind utilities;
 
 :root {
-  --stone: #282725;
-  --stone-shaded: #343330;
+  --stone: #14191c;
+  --stone-shaded: #052c34;
   --ghost: #f7f5f1;
   --ghost-shaded: #eeeae3;
   --lichen: #d2d6c5;
   --eggplant: #35313d;
-  --vellum: #EEEAE3;
+  --vellum: #F2F4F3;
   --shadow: var(--vellum);
-  --acid: #598ada;
+  --acid: #44a49c;
 
   --base: var(--ghost);
   --base-shaded: var(--ghost-shaded);

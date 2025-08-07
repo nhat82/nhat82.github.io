@@ -8,6 +8,7 @@ import { defineConfig } from "astro/config";
 export default defineConfig(
   /** @type {import('astro').AstroUserConfig} */
   {
+    base: '',
     integrations: [react(), sitemap(), tailwind(), mdx()],
     markdown: {
       rehypePlugins: [

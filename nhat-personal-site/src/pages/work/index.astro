@@ -11,6 +11,8 @@ const work = posts
 const sideProjects = posts
   .filter((post) => post.frontmatter.type === "sideproject")
   .sort(sortDate);
+
+const img_size = 150;
 ---
 
 <html lang="en">
@@ -40,7 +42,8 @@ const sideProjects = posts
                   class="border border-shadow bg-[var(--vellum)] p-8 aspect-video relative flex flex-col items-center justify-center"
                 >
                   <img
-                    width={60}
+                    width={img_size}
+                    height={img_size}
                     src={post.frontmatter.logo || ""}
                     alt={post.frontmatter.title}
                   />
@@ -68,7 +71,8 @@ const sideProjects = posts
                   class="border border-shadow bg-[var(--vellum)] p-8 aspect-video relative flex flex-col items-center justify-center"
                 >
                   <img
-                    width={60}
+                    width={img_size}
+                    height={img_size}
                     src={post.frontmatter.logo || ""}
                     alt={post.frontmatter.title}
                   />

@@ -1,10 +1,11 @@
 ---
 layout: ../../layouts/Work.astro
-title: Grassroots Groceries
+title: Team Match
 description:
 published: 12/28/2023
 year: 2022-2023
-logo: /images/food.png
+type: sideproject
+logo: /images/team.png
 ---
 
-## Grassroot Groceries
+## Team Match

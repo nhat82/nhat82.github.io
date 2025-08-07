@@ -1,9 +1,9 @@
 ---
 layout: ../../layouts/Work.astro
-title: AICycle
+title: Roots and Routes
 description:
 published: 9/17/24
-logo: /images/car.png
+logo: /images/tree.png
 year: 2022-Present
 ---
 

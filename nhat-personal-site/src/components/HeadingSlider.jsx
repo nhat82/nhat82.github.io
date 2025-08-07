@@ -10,7 +10,7 @@ const springConfig = {
 const history = [
   {
     year: 2003,
-    event: "Born.",
+    event: "Born in Vietnam 🇻🇳",
   },
   {
     year: 2010,
@@ -26,7 +26,7 @@ const history = [
   },
   {
     year: 2022,
-    event: "Got in UMD. Came to the US.",
+    event: "Got in UMD. Came to the US 🇺🇸.",
   },
   {
     year: 2023,

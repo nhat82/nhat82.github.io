@@ -1,13 +1,15 @@
 ---
 layout: ../../layouts/Work.astro
-title: Voice Expense Tracker
+title: Voice Expense Tracker Fullstack
 description:
-published: 12/28/2025
+published: 
 year: 2025
-logo: /images/apl.png
+logo: /images/voice.png
 type: sideproject
 status: building
 ---
+
+# Frontend
 
 ## Problem
 Tracking expenses across multiple banks is hard, I don't want to type in everything and don't want other people to know my banking information. 
@@ -62,5 +64,27 @@ Edge Cases:
 ### 2. Add your own category and columns 
 
 I thought about using AI agents and/or MCP server connecting to an LMM (probably Gemini because I don't want to waste money on OpenAI right now). 
+
+
+
+# Backend
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ##

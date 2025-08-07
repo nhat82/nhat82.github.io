@@ -7,5 +7,4 @@ year: 2022-2023
 logo: /images/apl.png
 ---
 
-## APL
-Trevor did engineering tings with temperature and space tape. 
+## Grassroot Groceries

@@ -2,7 +2,7 @@
 import MainBody from "../../components/MainBody.astro";
 import MainHead from "../../components/MainHead.astro";
 import SectionHeading from "../../components/SectionHeading.astro";
-import { sortDate, sortDateReverse } from "../../scripts/utils.js";
+import { sortDate } from "../../scripts/utils.js";
 const posts = await Astro.glob("./*.md");
 const work = posts
   .filter((post) => post.frontmatter.type !== "sideproject")

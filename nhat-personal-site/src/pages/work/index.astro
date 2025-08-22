@@ -12,7 +12,7 @@ const sideProjects = posts
   .filter((post) => post.frontmatter.type === "sideproject")
   .sort(sortDate);
 
-const img_size = 150;
+const img_size = 180;
 ---
 
 <html lang="en">
@@ -60,7 +60,7 @@ const img_size = 150;
     </section>
 
     <section class="fade-in max-w-[960px] mx-auto mt-12">
-      <SectionHeading> Side Projects </SectionHeading>
+      <SectionHeading> Personal & Team Projects </SectionHeading>
       <ul class="grid md:grid-cols-2 gap-8">
         {
           sideProjects.map((post) => {

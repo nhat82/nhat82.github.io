@@ -2,8 +2,8 @@
 layout: ../../layouts/Work.astro
 title: Grassroots Groceries
 description:
-published: 12/28/2023
-year: 2022-2023
+published: 2023
+year: 2023
 logo: /images/food.png
 ---
 
@@ -24,6 +24,5 @@ The scripts were also had run time limits too so I had to remove unimportant col
 - Read the documentation, and at least try to understand the gist of it. 
 - Experiment fast to learn fast. Doing something is always better than reading about it for hours. 
 - If stuck for too long, ask. How long? Depends but always make sure to research yourself first. 
-
 2. Be creative when limited resources and time. Keep it simple first. 
 3. How to explain technical terms simply to non-tech people. Use real life examples and similes. 
